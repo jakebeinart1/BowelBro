@@ -29,3 +29,23 @@ export async function getSyncProduct(productId: number) {
     }>
   }
 }
+
+export async function createPrintfulOrder(payload: {
+  external_id: string
+  recipient: {
+    name?: string
+    email?: string
+    phone?: string
+    address1?: string
+    address2?: string
+    city?: string
+    state_code?: string
+    country_code?: string
+    zip?: string
+  }
+  items: Array<{ sync_variant_id: number; quantity: number }>
+  confirm?: boolean
+}) {
+  const res = await printful.post('/orders', payload)
+  return res.data
+}

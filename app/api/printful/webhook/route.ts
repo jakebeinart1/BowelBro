@@ -1,15 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import crypto from 'crypto'
+
+function verifySignature(raw: string, sig: string | null) {
+  const secret = process.env.PRINTFUL_WEBHOOK_SECRET
+  if (!secret) return true
+  if (!sig) return false
+  const expected = crypto.createHmac('sha256', secret).update(raw).digest('base64')
+  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+}
 
 export async function POST(req: NextRequest) {
-  // Printful sends event data; optionally verify with shared secret if you set one.
-  const signature = req.headers.get('x-printful-signature')
-  const body = await req.json().catch(() => null)
+  const raw = await req.text()
+  const sig = req.headers.get('x-printful-signature') || req.headers.get('X-Printful-Signature')
+  if (!verifySignature(raw, sig)) return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
 
-  // TODO: validate signature if using a shared secret.
-  console.log('Printful webhook event:', { signature, body })
+  let body: any
+  try {
+    body = JSON.parse(raw)
+  } catch (err) {
+    return NextResponse.json({ ok: true })
+  }
 
-  // Handle events like order.created, order.updated, package.shipped, etc.
-  // Update your DB accordingly.
+  const ext =
+    body?.data?.order?.external_id ??
+    body?.order?.external_id ??
+    body?.external_id ??
+    null
 
-  return NextResponse.json({ received: true })
+  if (!ext) return NextResponse.json({ ok: true })
+
+  const type = String(body?.type ?? '').toLowerCase()
+  let status: 'FULFILLING' | 'SHIPPED' | null = null
+  if (type.includes('package_shipped') || body?.data?.shipments?.length) status = 'SHIPPED'
+  else if (type.includes('order_created') || type.includes('order_updated')) status = 'FULFILLING'
+
+  if (status) {
+    await prisma.order.update({ where: { id: String(ext) }, data: { status } }).catch(() => {})
+  }
+  return NextResponse.json({ ok: true })
 }
