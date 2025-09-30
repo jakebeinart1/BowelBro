@@ -1,26 +1,22 @@
-// Force server-side render and avoid any cached data
+// app/products/page.tsx
+
+// Force server runtime and fresh data
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-import { prisma } from '../../lib/db' // relative import (no @/ alias)
+import { prisma } from '../../lib/db' // use relative import, no @/ alias needed
 
 export default async function ProductsPage() {
-  // Exclude BigInt fields; only select what we render
   const products = await prisma.product.findMany({
     select: {
       id: true,
       name: true,
       thumbnailUrl: true,
       variants: {
-        select: {
-          id: true,
-          name: true,
-          imageUrl: true,
-          retailPrice: true, // Prisma Decimal; we'll cast to number when rendering
-        },
-      },
+        select: { id: true, name: true, imageUrl: true, retailPrice: true }
+      }
     },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { updatedAt: 'desc' }
   })
 
   return (
@@ -35,16 +31,10 @@ export default async function ProductsPage() {
             <h3 className="mt-2 font-semibold">{p.name}</h3>
             <div className="mt-2 text-sm">
               {p.variants.slice(0, 3).map((v) => (
-                <div key={v.id}>
-                  {v.name}
-                  {/* example price display if you want */}
-                  {/* {' · $' + Number(v.retailPrice).toFixed(2)} */}
-                </div>
+                <div key={v.id}>{v.name}</div>
               ))}
             </div>
-            <a className="btn mt-3" href={`/products/${p.id}`}>
-              View
-            </a>
+            <a className="btn mt-3" href={`/products/${p.id}`}>View</a>
           </div>
         ))}
       </div>
