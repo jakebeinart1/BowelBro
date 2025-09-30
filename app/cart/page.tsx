@@ -1,6 +1,6 @@
+import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import { getCartWithItems, updateCartItemQuantity, removeCartItem } from '@/lib/cart'
 import { createCheckoutSession } from '@/lib/checkout'
 import { getRequestOrigin } from '@/lib/origin'
@@ -23,44 +23,52 @@ export default async function CartPage() {
   const cart = await getCartWithItems()
   const items = cart?.items ?? []
   const currency = (items[0]?.variant.currency ?? 'usd').toUpperCase()
-  const subtotal = items.reduce((sum, item) => {
-    return sum + Number(item.variant.retailPrice ?? 0) * item.quantity
-  }, 0)
+  const subtotal = items.reduce((sum, item) => sum + Number(item.variant.retailPrice ?? 0) * item.quantity, 0)
 
-  async function updateQuantity(formData: FormData) {
+  const updateQuantity = async (formData: FormData) => {
     'use server'
     const itemId = String(formData.get('itemId') ?? '')
     const quantity = Number(formData.get('quantity') ?? '1')
+
     try {
       await updateCartItemQuantity(itemId, quantity)
-    } catch (err) {
-      console.error('Failed to update cart item', err)
+    } catch (error) {
+      console.error('Failed to update cart item', error)
     }
+
     revalidatePath('/cart')
   }
 
-  async function removeItem(formData: FormData) {
+  const removeItem = async (formData: FormData) => {
     'use server'
     const itemId = String(formData.get('itemId') ?? '')
+
     try {
       await removeCartItem(itemId)
-    } catch (err) {
-      console.error('Failed to remove cart item', err)
+    } catch (error) {
+      console.error('Failed to remove cart item', error)
     }
+
     revalidatePath('/cart')
   }
 
-  async function checkout() {
+  const checkout = async () => {
     'use server'
     const cartId = cookies().get('cartId')?.value
-    if (!cartId) redirect('/products')
+    if (!cartId) {
+      redirect('/products')
+    }
+
     const origin = process.env.NEXTAUTH_URL || getRequestOrigin()
     const session = await createCheckoutSession({ cartId, origin })
-    if (!session.url) throw new Error('Stripe session missing redirect URL')
+    if (!session.url) {
+      throw new Error('Stripe session missing redirect URL')
+    }
+
     redirect(session.url)
   }
 
-  if (!items.length) {
+  if (items.length === 0) {
     return (
       <div className="grid gap-4">
         <h1 className="text-3xl font-semibold">Your Cart</h1>
@@ -122,7 +130,7 @@ export default async function CartPage() {
                 <div className="text-right font-medium">{formatPrice(lineTotal, currency)}</div>
               </div>
             )
-          })
+          })}
         </div>
       </div>
 
