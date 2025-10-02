@@ -27,7 +27,7 @@ export default async function ProductsPage() {
           <div>
             <h1 className="text-3xl font-semibold text-[#1f1d1a]">Fresh tees for every Bowel Bro</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#544a42]">
-              Rotating designs, endless gut jokes, and heartfelt statements—each one printed on demand so nothing goes to waste.
+              Rotating designs, endless gut jokes, and heartfelt statements—each one printed on demand so nothing goes to waste, with 100% of profits funding IBD research and support.
             </p>
           </div>
           <div className="flex gap-2">

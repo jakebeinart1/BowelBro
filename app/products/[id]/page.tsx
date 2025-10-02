@@ -69,11 +69,16 @@ export default async function ProductDetail({ params }: { params: { id: string }
     <div className="grid gap-10 lg:grid-cols-[1.4fr,1fr]">
       <div className="relative overflow-hidden rounded-3xl border border-[#efe6d9] bg-white/70 shadow-[0_30px_60px_-45px_rgba(39,31,24,0.55)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(13,148,136,0.12),_transparent_55%)]" />
-        <div className="relative">
+        <div className="relative aspect-[4/5] w-full">
           {heroImage ? (
-            <img src={heroImage} alt={product.name} className="h-[420px] w-full object-cover" />
+            <img
+              src={heroImage}
+              alt={product.name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
           ) : (
-            <div className="flex h-[420px] items-center justify-center text-[#8a7b70]">Imagery coming soon</div>
+            <div className="flex h-full items-center justify-center text-[#8a7b70]">Imagery coming soon</div>
           )}
         </div>
         {product.description ? (
@@ -151,7 +156,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
           </div>
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-[#334155]" />
-            A portion of every sale funds IBD research.
+            Every dollar of profit is donated to IBD research and patient support.
           </div>
         </div>
       </aside>

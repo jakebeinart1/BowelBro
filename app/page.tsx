@@ -9,28 +9,25 @@ export default function HomePage() {
           Everyone is a <span className="text-[#0f766e]">BOWEL BRO.</span>
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#534941]">
-          Care for a fellow bowel by buying a shirt, spreading awareness, and donating to IBD research. Each purchase sends love (and funds) to the IBD community.
+          Every single dollar of profit goes straight to IBD research and patient support—this shop is for awareness, not income. Gear up, laugh loud, and love someone&apos;s gut today.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a className="btn" href="/products">
             Browse the collection
           </a>
-          <a className="btn-secondary" href="#impact">
-            Learn about the mission
-          </a>
         </div>
         <dl className="mt-10 grid gap-6 sm:grid-cols-3">
           <div>
-            <dt className="text-xs uppercase tracking-[0.25rem] text-[#8a7b70]">Donated</dt>
-            <dd className="mt-2 text-2xl font-semibold text-[#1f1d1a]">25% of profits</dd>
+            <dt className="text-xs uppercase tracking-[0.25rem] text-[#8a7b70]">Profits</dt>
+            <dd className="mt-2 text-2xl font-semibold text-[#1f1d1a]">100% donated</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-[0.25rem] text-[#8a7b70]">Tees</dt>
+            <dt className="text-xs uppercase tracking-[0.25rem] text-[#8a7b70]">Comfort</dt>
             <dd className="mt-2 text-2xl font-semibold text-[#1f1d1a]">Butter-soft fabric</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-[0.25rem] text-[#8a7b70]">Community</dt>
-            <dd className="mt-2 text-2xl font-semibold text-[#1f1d1a]">10k+ supporters</dd>
+            <dt className="text-xs uppercase tracking-[0.25rem] text-[#8a7b70]">Impact</dt>
+            <dd className="mt-2 text-2xl font-semibold text-[#1f1d1a]">Every order fuels IBD awareness</dd>
           </div>
         </dl>
       </div>
@@ -70,7 +67,7 @@ export default function HomePage() {
             <article className="rounded-2xl bg-[#f9f6ef] p-6">
               <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#8a7b70]">Support</h3>
               <p className="mt-3 text-sm leading-relaxed text-[#544a42]">
-                A portion of every sale goes directly to organizations advancing inflammatory bowel disease research.
+                100% of profits are donated to organizations advancing inflammatory bowel disease research and patient care.
               </p>
             </article>
             <article className="rounded-2xl bg-[#f3f8f6] p-6">

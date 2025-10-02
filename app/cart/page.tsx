@@ -130,13 +130,13 @@ export default async function CartPage() {
                           className="w-16 rounded-full border border-transparent bg-white px-3 py-1 text-sm"
                         />
                       </label>
-                      <button type="submit" className="text-xs font-semibold uppercase tracking-[0.2rem] text-[#8a7b70]">
+                      <button type="submit" className="btn-secondary !px-4 !py-1 text-[11px] uppercase tracking-[0.25rem]">
                         Update
                       </button>
                     </form>
                     <form action={removeItem}>
                       <input type="hidden" name="itemId" value={item.id} />
-                      <button type="submit" className="text-xs font-semibold uppercase tracking-[0.2rem] text-[#8a7b70]">
+                      <button type="submit" className="btn-secondary !px-4 !py-1 text-[11px] uppercase tracking-[0.25rem]">
                         Remove
                       </button>
                     </form>
