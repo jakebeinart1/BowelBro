@@ -43,18 +43,9 @@ async function main() {
         for (const v of variants) {
           const variantIdBI = toBigInt(v.id)
           const unitPrice = parseFloat(String(v.retail_price ?? '0'))
-          const files = (v.files ?? []) as Array<{
-            preview_url?: string
-            thumbnail_url?: string
-            url?: string
-          }>
-          const previewUrls = files
-            .map((file) => file?.preview_url || file?.thumbnail_url || file?.url)
-            .filter((url): url is string => Boolean(url))
-          const uniqueUrls = Array.from(new Set(previewUrls))
-          const img = uniqueUrls[0]
+          const img = v.files?.[0]?.preview_url
 
-          const variantRecord = await prisma.variant.upsert({
+          await prisma.variant.upsert({
             where: { printfulId: variantIdBI },
             update: {
               name: v.name ?? `Variant ${variantIdBI.toString()}`,
@@ -70,18 +61,6 @@ async function main() {
               productId: product.id
             }
           })
-
-          await prisma.variantImage.deleteMany({ where: { variantId: variantRecord.id } })
-
-          if (uniqueUrls.length) {
-            await prisma.variantImage.createMany({
-              data: uniqueUrls.map((url, index) => ({
-                variantId: variantRecord.id,
-                url,
-                position: index
-              }))
-            })
-          }
         }
 
         totalProducts += 1
