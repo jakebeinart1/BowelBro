@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/db'
 import { addVariantToCart } from '@/lib/cart'
+import { ProductGallery } from '@/components/product-gallery'
 
 export const runtime = 'nodejs'
 
@@ -23,7 +24,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
     include: {
       variants: {
         where: { isEnabled: true },
-        orderBy: { name: 'asc' }
+        orderBy: { name: 'asc' },
+        include: {
+          images: { orderBy: { position: 'asc' } }
+        }
       }
     }
   })
@@ -34,12 +38,34 @@ export default async function ProductDetail({ params }: { params: { id: string }
     id: variant.id,
     name: variant.name,
     imageUrl: variant.imageUrl ?? product.thumbnailUrl ?? null,
+    images: variant.images.map((image) => image.url),
     price: Number(variant.retailPrice),
     currency: (variant.currency || product.currency || 'usd').toUpperCase()
   }))
 
   const defaultVariant = variants[0]
-  const heroImage = defaultVariant?.imageUrl ?? product.thumbnailUrl ?? null
+
+  const gallerySet = new Set<string>()
+  const galleryImages: Array<{ url: string; alt: string }> = []
+
+  if (product.thumbnailUrl) {
+    gallerySet.add(product.thumbnailUrl)
+    galleryImages.push({ url: product.thumbnailUrl, alt: `${product.name} thumbnail` })
+  }
+
+  for (const variant of variants) {
+    const variantAlt = `${product.name} – ${variant.name}`
+    for (const url of variant.images) {
+      if (!gallerySet.has(url)) {
+        gallerySet.add(url)
+        galleryImages.push({ url, alt: variantAlt })
+      }
+    }
+  }
+
+  if (!galleryImages.length && defaultVariant?.imageUrl) {
+    galleryImages.push({ url: defaultVariant.imageUrl, alt: product.name })
+  }
 
   async function addToCart(formData: FormData) {
     'use server'
@@ -67,22 +93,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.4fr,1fr]">
-      <div className="relative overflow-hidden rounded-3xl border border-[#efe6d9] bg-white/70 shadow-[0_30px_60px_-45px_rgba(39,31,24,0.55)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(13,148,136,0.12),_transparent_55%)]" />
-        <div className="relative aspect-[4/5] w-full">
-          {heroImage ? (
-            <img
-              src={heroImage}
-              alt={product.name}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-[#8a7b70]">Imagery coming soon</div>
-          )}
-        </div>
+      <div className="space-y-6">
+        <ProductGallery images={galleryImages} />
         {product.description ? (
-          <div className="relative border-t border-[#efe6d9] bg-white/85 p-8">
+          <div className="rounded-3xl border border-[#efe6d9] bg-white/80 p-8 shadow-[0_20px_45px_-40px_rgba(39,31,24,0.55)]">
             <h2 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#8a7b70]">Story</h2>
             <p className="mt-3 text-sm leading-relaxed text-[#544a42]">{product.description}</p>
           </div>
@@ -107,21 +121,40 @@ export default async function ProductDetail({ params }: { params: { id: string }
         {variants.length ? (
           <form action={addToCart} className="grid gap-5">
             <input type="hidden" name="productId" value={product.id} />
-            <label className="grid gap-2 text-sm font-medium text-[#544a42]">
-              Variant
-              <select
-                name="variantId"
-                defaultValue={defaultVariant?.id}
-                className="rounded-2xl border border-[#e9e1d7] bg-white px-4 py-2 text-sm text-[#1f1d1a] shadow-inner"
-                required
-              >
-                {variants.map((variant) => (
-                  <option key={variant.id} value={variant.id}>
-                    {variant.name} · {formatPrice(variant.price, variant.currency)}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <fieldset className="grid gap-3 text-sm font-medium text-[#544a42]">
+              <legend>Variant</legend>
+              <div className="grid gap-2">
+                {variants.map((variant) => {
+                  const primaryImage = variant.images[0] ?? variant.imageUrl
+                  return (
+                    <label
+                      key={variant.id}
+                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#e9e1d7] bg-white px-3 py-2 shadow-sm transition hover:border-[#0f766e]/40"
+                    >
+                      <input
+                        type="radio"
+                        name="variantId"
+                        value={variant.id}
+                        defaultChecked={variant.id === defaultVariant?.id}
+                        className="accent-[#0f766e]"
+                        required
+                      />
+                      {primaryImage ? (
+                        <img src={primaryImage} alt={variant.name} className="h-12 w-12 rounded-xl object-cover" />
+                      ) : (
+                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3ede4] text-[10px] uppercase text-[#8a7b70]">
+                          No Img
+                        </span>
+                      )}
+                      <span className="flex flex-1 flex-col">
+                        <span className="font-semibold text-[#1f1d1a]">{variant.name}</span>
+                        <span className="text-xs text-[#8a7b70]">{formatPrice(variant.price, variant.currency)}</span>
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
 
             <label className="grid gap-2 text-sm font-medium text-[#544a42]">
               Quantity
