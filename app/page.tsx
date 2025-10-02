@@ -2,14 +2,11 @@ export default function HomePage() {
   return (
     <section className="grid gap-12 lg:grid-cols-[1.2fr,0.8fr] lg:items-center">
       <div className="card bg-white/90 shadow-[0_30px_60px_-40px_rgba(32,24,16,0.65)]">
-        <span className="inline-flex items-center rounded-full bg-[#f1e8da] px-4 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[#5c4f45]">
-          Bowel Bros unite
-        </span>
-        <h1 className="mt-6 text-4xl font-semibold leading-tight text-[#1f1d1a] sm:text-5xl">
+        <h1 className="mt-2 text-4xl font-semibold leading-tight text-[#1f1d1a] sm:text-5xl">
           Everyone is a <span className="text-[#0f766e]">BOWEL BRO.</span>
         </h1>
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#534941]">
-          Every single dollar of profit goes straight to IBD research and patient support—this shop is for awareness, not income. Gear up, laugh loud, and love someone&apos;s gut today.
+          Every single dollar of profit goes straight to IBD research and patient support—this shop is for awareness, not income. Help save a fellow bowel, bro.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a className="btn" href="/products">
@@ -32,27 +29,26 @@ export default function HomePage() {
         </dl>
       </div>
       <div className="relative hidden lg:block">
-        <div className="absolute -left-10 top-10 h-24 w-24 rounded-full bg-[#0f766e]/20 blur-2xl" />
-        <div className="card relative h-full min-h-[380px] overflow-hidden bg-gradient-to-br from-white via-[#f7f3ed] to-[#f0efe9]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(13,148,136,0.12),_transparent_60%)]" />
-          <div className="relative flex h-full flex-col justify-between p-8">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.35rem] text-[#8a7b70]">IBD Awareness</p>
-              <p className="mt-3 max-w-xs text-base text-[#544a42]">
+        <div className="card relative h-full min-h-[380px] overflow-hidden bg-[#f0f1f3]">
+          <div className="relative flex h-full flex-col justify-between gap-6 p-8 text-[#3d3e42]">
+            <div className="space-y-4">
+              <p className="text-sm font-semibold uppercase tracking-[0.35rem] text-[#6d7078]">IBD Awareness</p>
+              <p className="max-w-xs text-base text-[#3d3e42]">
                 From playful slogans to bold statements, every design reminds the world to care for our insides.
               </p>
+              <div className="h-px w-full bg-[#d7d9dd]" />
             </div>
-            <div className="flex flex-col gap-4 text-sm text-[#544a42]">
+            <div className="flex flex-col gap-4 text-sm text-[#3d3e42]">
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[#0f766e]" />
+                <span className="h-2 w-2 rounded-full bg-[#6b7280]" />
                 Sustainably printed on demand by Printful.
               </div>
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[#d97706]" />
+                <span className="h-2 w-2 rounded-full bg-[#9ca3af]" />
                 Packed and shipped within 3-5 days worldwide.
               </div>
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[#334155]" />
+                <span className="h-2 w-2 rounded-full bg-[#4b5563]" />
                 Proceeds fuel IBD research and patient support.
               </div>
             </div>

@@ -3,9 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-[#fefbf6] text-[#1f1d1a];
-  background-image: radial-gradient(circle at top left, rgba(255, 214, 153, 0.25), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(152, 230, 198, 0.25), transparent 50%);
+  @apply bg-[#fdf1dd] text-[#1f1d1a];
 }
 
 .container { @apply max-w-6xl mx-auto px-4; }
