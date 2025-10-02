@@ -96,7 +96,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
         ) : null}
       </div>
 
-      <aside className="card space-y-7">
+      <aside className="card space-y-7 bg-[linear-gradient(140deg,rgba(218,233,245,0.7),rgba(253,240,213,0.7))]">
         <div className="space-y-3">
           <a className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--text-muted)]" href="/products">
             ← Back to all tees
@@ -115,7 +115,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
           <form action={addToCart} className="grid gap-5">
             <input type="hidden" name="productId" value={product.id} />
             <fieldset className="grid gap-3 text-sm font-medium text-[var(--text)]/85">
-              <legend>Variant</legend>
+              <legend className="text-[var(--teal)]">Variant</legend>
               <div className="grid gap-2">
                 {variants.map((variant) => {
                   const primaryImage = variant.imageUrl
@@ -149,7 +149,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
               </div>
             </fieldset>
 
-            <label className="grid gap-2 text-sm font-medium text-[var(--text)]/85">
+            <label className="grid gap-2 text-sm font-medium text-[var(--teal)]">
               Quantity
               <input
                 className="w-24 rounded-2xl border border-[var(--border)] bg-white px-3 py-2 text-sm"
@@ -177,11 +177,11 @@ export default async function ProductDetail({ params }: { params: { id: string }
             Printed on premium, breathable cotton blend.
           </div>
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#c8b38b]" />
+            <span className="h-2 w-2 rounded-full bg-[rgba(217,133,106,0.6)]" />
             Packaged and shipped by Printful within 3-5 business days.
           </div>
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#1f2420]" />
+            <span className="h-2 w-2 rounded-full bg-[rgba(34,50,57,0.7)]" />
             Every dollar of profit is donated to IBD research and patient support.
           </div>
         </div>

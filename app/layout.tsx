@@ -27,16 +27,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className={`${manrope.className} antialiased`}>
-        <header className="border-b border-[var(--border)] bg-[rgba(255,255,255,0.85)] backdrop-blur-xl sticky top-0 z-50 shadow-[0_10px_30px_-24px_rgba(17,16,14,0.45)]">
+        <header className="border-b border-[rgba(31,27,24,0.08)] bg-[radial-gradient(circle_at_top,var(--sand-deep),rgba(255,255,255,0.92))] backdrop-blur-xl sticky top-0 z-50 shadow-[0_12px_35px_-28px_rgba(18,16,14,0.45)]">
           <div className="container flex h-[72px] items-center justify-between gap-6">
-            <Link href="/" className="text-lg font-semibold uppercase tracking-[0.35rem] text-[var(--accent)]">
+            <Link href="/" className="text-lg font-semibold uppercase tracking-[0.35rem] text-[var(--charcoal)]">
               Bowel Bro
             </Link>
             <MainNav cartBadge={cartBadge} />
           </div>
         </header>
         <main className="container py-10 lg:py-14">{children}</main>
-        <footer className="border-t border-[var(--border)] bg-[rgba(255,255,255,0.78)] mt-20 backdrop-blur">
+        <footer className="border-t border-[rgba(31,27,24,0.08)] bg-[radial-gradient(circle_at_bottom,var(--sky),rgba(255,255,255,0.85))] mt-20 backdrop-blur">
           <div className="container flex flex-col gap-3 py-8 text-sm text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
             <span>© {new Date().getFullYear()} Bowel Bro · Made with guts.</span>
             <div className="flex gap-4">

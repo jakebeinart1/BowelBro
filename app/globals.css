@@ -4,62 +4,72 @@
 
 :root {
   --sand: #fdf0d5;
-  --sand-deep: #f7e4c0;
+  --sand-deep: #f6d6a8;
+  --sky: #dae9f5;
+  --mist: #eef6f1;
   --surface: #ffffff;
-  --surface-muted: rgba(255, 255, 255, 0.88);
-  --border: #ead9bd;
-  --text: #191817;
-  --text-muted: #5b554e;
-  --accent: #344e41;
-  --accent-hover: #2a3d33;
-  --accent-soft: rgba(52, 78, 65, 0.08);
+  --surface-muted: rgba(255, 255, 255, 0.9);
+  --border: #e3cfba;
+  --text: #1f1b18;
+  --text-muted: #5d5852;
+  --forest: #344e41;
+  --teal: #3d8b84;
+  --terracotta: #d9856a;
+  --plum: #575279;
+  --charcoal: #22323a;
+  --accent: var(--forest);
+  --accent-alt: var(--teal);
+  --accent-warm: var(--terracotta);
 }
 
 body {
   @apply text-base leading-relaxed;
-  background-color: var(--sand);
+  background-image: radial-gradient(circle at 0% 0%, rgba(217, 133, 106, 0.18), transparent 52%),
+    radial-gradient(circle at 90% 15%, rgba(61, 139, 132, 0.18), transparent 55%),
+    linear-gradient(135deg, var(--sand) 0%, var(--mist) 45%, #ffffff 100%);
+  background-attachment: fixed;
   color: var(--text);
 }
 
 .container { @apply max-w-6xl mx-auto px-4; }
 
 .btn {
-  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold shadow-sm transition;
-  background-color: var(--accent);
+  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold shadow-lg transition;
+  background-image: linear-gradient(135deg, var(--forest), var(--teal));
   color: #ffffff;
 }
 
 .btn:hover {
-  background-color: var(--accent-hover);
+  filter: brightness(1.05);
 }
 
 .btn:focus-visible {
-  outline: 2px solid rgba(52, 78, 65, 0.6);
+  outline: 2px solid rgba(61, 139, 132, 0.6);
   outline-offset: 2px;
 }
 
 .btn-secondary {
   @apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition;
-  border: 1px solid var(--border);
-  background-color: rgba(255, 255, 255, 0.65);
-  color: var(--text-muted);
+  border: 1px solid rgba(52, 78, 65, 0.18);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(253, 240, 213, 0.85));
+  color: var(--forest);
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-  color: var(--accent);
+  border-color: rgba(61, 139, 132, 0.5);
+  color: var(--teal);
 }
 
 .btn-secondary:focus-visible {
-  outline: 2px solid rgba(52, 78, 65, 0.4);
+  outline: 2px solid rgba(61, 139, 132, 0.35);
   outline-offset: 2px;
 }
 
 .card {
-  @apply rounded-3xl border p-6 shadow-[0_24px_50px_-34px_rgba(20,18,15,0.55)];
-  border-color: var(--border);
-  background: var(--surface-muted);
-  backdrop-filter: blur(8px);
+  @apply rounded-3xl border p-6 shadow-[0_30px_65px_-40px_rgba(25,22,18,0.55)];
+  border-color: rgba(31, 27, 24, 0.08);
+  background: radial-gradient(circle at top, rgba(250, 248, 243, 0.95), rgba(255, 255, 255, 0.88));
+  backdrop-filter: blur(10px);
 }
 
 a {

@@ -29,7 +29,7 @@ export function MainNav({ cartBadge = null }: MainNavProps) {
   }
 
   return (
-    <nav className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-white/80 px-1 py-1 text-sm font-medium text-[var(--text-muted)] shadow-[0_12px_30px_-28px_rgba(22,20,18,0.55)]">
+    <nav className="flex items-center gap-1 rounded-full border border-[rgba(61,139,132,0.35)] bg-[rgba(250,250,250,0.9)] px-1 py-1 text-sm font-medium text-[var(--text-muted)] shadow-[0_14px_35px_-26px_rgba(27,25,21,0.5)]">
       {navItems.map((item) => {
         const active = isActive(item.href)
         const baseClasses = 'relative rounded-full px-5 py-2 transition-colors duration-200'
@@ -39,12 +39,14 @@ export function MainNav({ cartBadge = null }: MainNavProps) {
             href={item.href}
             className={clsx(
               baseClasses,
-              active ? 'bg-white text-[var(--accent)] shadow-sm' : 'hover:text-[var(--accent)]'
+              active
+                ? 'bg-gradient-to-r from-[var(--forest)] to-[var(--teal)] text-white shadow-[0_10px_25px_-20px_rgba(52,78,65,0.65)]'
+                : 'hover:text-[var(--teal)]'
             )}
           >
             {item.label}
             {item.href === '/cart' && cartBadge ? (
-              <span className="absolute -right-2 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-semibold uppercase tracking-[0.2rem] text-white">
+              <span className="absolute -right-2 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--terracotta)] px-1 text-[10px] font-semibold uppercase tracking-[0.2rem] text-white shadow-[0_6px_18px_-10px_rgba(217,133,106,0.8)]">
                 {cartBadge}
               </span>
             ) : null}

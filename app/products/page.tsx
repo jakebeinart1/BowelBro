@@ -22,7 +22,9 @@ export default async function ProductsPage() {
   return (
     <div className="grid gap-10">
       <header className="grid gap-4 rounded-3xl border border-[var(--border)] bg-white/75 p-8 shadow-[0_24px_50px_-34px_rgba(20,18,15,0.55)] backdrop-blur">
-        <span className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--text-muted)]">Shop the drop</span>
+        <span className="inline-flex w-max items-center gap-2 rounded-full bg-[rgba(61,139,132,0.12)] px-4 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--teal)]">
+          Shop the drop
+        </span>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-semibold text-[var(--accent)]">Fresh tees for every Bowel Bro</h1>
@@ -53,8 +55,8 @@ export default async function ProductsPage() {
             const samplePrice = price ? Number(price).toFixed(2) : null
 
             return (
-              <article key={product.id} className="card h-full overflow-hidden">
-                <div className="relative overflow-hidden rounded-2xl bg-[rgba(255,255,255,0.7)]">
+              <article key={product.id} className="card h-full overflow-hidden bg-[linear-gradient(140deg,rgba(52,78,65,0.08),rgba(255,255,255,0.95))]">
+                <div className="relative overflow-hidden rounded-2xl bg-[rgba(255,255,255,0.72)] shadow-inner">
                   {preview ? (
                     <img
                       src={preview}

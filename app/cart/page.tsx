@@ -70,7 +70,7 @@ export default async function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="card grid gap-4 text-center text-[var(--text)]/80">
+      <div className="card grid gap-4 bg-[linear-gradient(135deg,rgba(253,240,213,0.85),rgba(218,233,245,0.65))] text-center text-[var(--text)]/80">
         <h1 className="text-3xl font-semibold text-[var(--accent)]">Your cart is empty (for now)</h1>
         <p>Grab a tee that speaks to your gut and give the IBD community a boost.</p>
         <div className="flex justify-center gap-3">
@@ -88,7 +88,7 @@ export default async function CartPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
       <div className="space-y-6">
-        <div className="card bg-white/85">
+        <div className="card bg-[linear-gradient(135deg,rgba(253,240,213,0.88),rgba(255,255,255,0.86))]">
           <h1 className="text-3xl font-semibold text-[var(--accent)]">Your Cart</h1>
           <p className="mt-2 text-sm leading-relaxed text-[var(--text)]/80">
             Ready when your bowels are. Update quantities, remove items, or head straight to checkout.
@@ -102,7 +102,7 @@ export default async function CartPage() {
             const image = item.variant.imageUrl ?? item.variant.product.thumbnailUrl ?? null
 
             return (
-              <div key={item.id} className="card flex flex-col gap-4 sm:flex-row sm:gap-6">
+              <div key={item.id} className="card flex flex-col gap-4 bg-[rgba(255,255,255,0.9)] sm:flex-row sm:gap-6">
                 {image ? (
                   <img
                     src={image}
@@ -151,7 +151,7 @@ export default async function CartPage() {
         </div>
       </div>
 
-      <div className="card h-max space-y-5 bg-white/85">
+      <div className="card h-max space-y-5 bg-[linear-gradient(135deg,rgba(61,139,132,0.08),rgba(255,255,255,0.9))]">
         <div>
           <span className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--text-muted)]">Order summary</span>
           <div className="mt-3 flex items-center justify-between">
