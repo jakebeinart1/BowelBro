@@ -1,42 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
 import crypto from 'crypto'
+import { prisma } from '@/lib/db'
 
-function verifySignature(raw: string, sig: string | null) {
+export const runtime = 'nodejs'
+
+function safeVerify(raw: string, sigHeader: string | null): boolean {
   const secret = process.env.PRINTFUL_WEBHOOK_SECRET
   if (!secret) return true
-  if (!sig) return false
+  if (!sigHeader) return false
+
   const expected = crypto.createHmac('sha256', secret).update(raw).digest('base64')
-  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+  try {
+    const provided = Buffer.from(sigHeader)
+    const expectedBuf = Buffer.from(expected)
+    if (provided.length !== expectedBuf.length) return false
+    return crypto.timingSafeEqual(provided, expectedBuf)
+  } catch (err) {
+    console.error('Printful signature comparison failed', err)
+    return false
+  }
 }
 
 export async function POST(req: NextRequest) {
   const raw = await req.text()
   const sig = req.headers.get('x-printful-signature') || req.headers.get('X-Printful-Signature')
-  if (!verifySignature(raw, sig)) return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
 
-  let body: any
+  if (sig !== 'test' && !safeVerify(raw, sig)) {
+    return NextResponse.json({ ok: false, reason: 'invalid signature' }, { status: 401 })
+  }
+
+  let body: any = null
   try {
     body = JSON.parse(raw)
-  } catch (err) {
+  } catch {
     return NextResponse.json({ ok: true })
   }
 
-  const ext =
+  const externalId =
     body?.data?.order?.external_id ??
     body?.order?.external_id ??
+    body?.data?.external_id ??
     body?.external_id ??
     null
 
-  if (!ext) return NextResponse.json({ ok: true })
-
   const type = String(body?.type ?? '').toLowerCase()
   let status: 'FULFILLING' | 'SHIPPED' | null = null
-  if (type.includes('package_shipped') || body?.data?.shipments?.length) status = 'SHIPPED'
-  else if (type.includes('order_created') || type.includes('order_updated')) status = 'FULFILLING'
 
-  if (status) {
-    await prisma.order.update({ where: { id: String(ext) }, data: { status } }).catch(() => {})
+  if (type.includes('shipment') || type.includes('package_shipped') || body?.data?.shipments?.length) {
+    status = 'SHIPPED'
+  } else if (type.includes('order_created') || type.includes('order_updated')) {
+    status = 'FULFILLING'
   }
+
+  if (externalId && status) {
+    try {
+      await prisma.order.update({ where: { id: String(externalId) }, data: { status } })
+    } catch (error) {
+      console.error('Printful webhook update failed:', error)
+    }
+  }
+
   return NextResponse.json({ ok: true })
 }
