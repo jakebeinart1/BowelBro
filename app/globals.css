@@ -2,31 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --sand: #fdf0d5;
+  --sand-deep: #f7e4c0;
+  --surface: #ffffff;
+  --surface-muted: rgba(255, 255, 255, 0.88);
+  --border: #ead9bd;
+  --text: #191817;
+  --text-muted: #5b554e;
+  --accent: #344e41;
+  --accent-hover: #2a3d33;
+  --accent-soft: rgba(52, 78, 65, 0.08);
+}
+
 body {
-  @apply bg-[#fdf1dd] text-[#1f1d1a];
+  @apply text-base leading-relaxed;
+  background-color: var(--sand);
+  color: var(--text);
 }
 
 .container { @apply max-w-6xl mx-auto px-4; }
 
 .btn {
-  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition;
-  @apply bg-[#0d9488] text-white shadow-sm hover:bg-[#0b7f74] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e];
+  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold shadow-sm transition;
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+.btn:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn:focus-visible {
+  outline: 2px solid rgba(52, 78, 65, 0.6);
+  outline-offset: 2px;
 }
 
 .btn-secondary {
   @apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition;
-  @apply bg-transparent border border-[#d8d1c8] text-[#463e37] hover:bg-[#f6efe6];
+  border: 1px solid var(--border);
+  background-color: rgba(255, 255, 255, 0.65);
+  color: var(--text-muted);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--accent);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid rgba(52, 78, 65, 0.4);
+  outline-offset: 2px;
 }
 
 .card {
-  @apply rounded-3xl border border-[#ebe4da] bg-white/80 p-6 shadow-[0_20px_40px_-28px_rgba(39,32,24,0.45)];
-  backdrop-filter: blur(6px);
+  @apply rounded-3xl border p-6 shadow-[0_24px_50px_-34px_rgba(20,18,15,0.55)];
+  border-color: var(--border);
+  background: var(--surface-muted);
+  backdrop-filter: blur(8px);
 }
 
 a {
   @apply transition-colors duration-150;
+  color: inherit;
 }
 
 a:hover {
-  @apply text-[#0f766e];
+  color: var(--accent);
 }

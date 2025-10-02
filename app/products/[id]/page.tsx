@@ -89,32 +89,32 @@ export default async function ProductDetail({ params }: { params: { id: string }
       <div className="space-y-6">
         <ProductGallery images={galleryImages} />
         {product.description ? (
-          <div className="rounded-3xl border border-[#efe6d9] bg-white/80 p-8 shadow-[0_20px_45px_-40px_rgba(39,31,24,0.55)]">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#8a7b70]">Story</h2>
-            <p className="mt-3 text-sm leading-relaxed text-[#544a42]">{product.description}</p>
+          <div className="rounded-3xl border border-[var(--border)] bg-white/85 p-8 shadow-[0_20px_45px_-36px_rgba(22,20,18,0.55)]">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--text-muted)]">Story</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--text)]/80">{product.description}</p>
           </div>
         ) : null}
       </div>
 
       <aside className="card space-y-7">
         <div className="space-y-3">
-          <a className="text-xs font-semibold uppercase tracking-[0.3rem] text-[#8a7b70]" href="/products">
+          <a className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--text-muted)]" href="/products">
             ← Back to all tees
           </a>
-          <h1 className="text-3xl font-semibold text-[#1f1d1a]">{product.name}</h1>
+          <h1 className="text-3xl font-semibold text-[var(--accent)]">{product.name}</h1>
           {defaultVariant ? (
-            <p className="text-lg text-[#534941]">
+            <p className="text-lg text-[var(--text)]/85">
               From {formatPrice(defaultVariant.price, defaultVariant.currency)}
             </p>
           ) : (
-            <p className="text-sm text-[#8a7b70]">No variants available right now.</p>
+            <p className="text-sm text-[var(--text-muted)]">No variants available right now.</p>
           )}
         </div>
 
         {variants.length ? (
           <form action={addToCart} className="grid gap-5">
             <input type="hidden" name="productId" value={product.id} />
-            <fieldset className="grid gap-3 text-sm font-medium text-[#544a42]">
+            <fieldset className="grid gap-3 text-sm font-medium text-[var(--text)]/85">
               <legend>Variant</legend>
               <div className="grid gap-2">
                 {variants.map((variant) => {
@@ -122,26 +122,26 @@ export default async function ProductDetail({ params }: { params: { id: string }
                   return (
                     <label
                       key={variant.id}
-                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#e9e1d7] bg-white px-3 py-2 shadow-sm transition hover:border-[#0f766e]/40"
+                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--accent)]/40"
                     >
                       <input
                         type="radio"
                         name="variantId"
                         value={variant.id}
                         defaultChecked={variant.id === defaultVariant?.id}
-                        className="accent-[#0f766e]"
+                        className="accent-[#344e41]"
                         required
                       />
                       {primaryImage ? (
                         <img src={primaryImage} alt={variant.name} className="h-12 w-12 rounded-xl object-cover" />
                       ) : (
-                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3ede4] text-[10px] uppercase text-[#8a7b70]">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgba(52,78,65,0.08)] text-[10px] uppercase text-[var(--text-muted)]">
                           No Img
                         </span>
                       )}
                       <span className="flex flex-1 flex-col">
-                        <span className="font-semibold text-[#1f1d1a]">{variant.name}</span>
-                        <span className="text-xs text-[#8a7b70]">{formatPrice(variant.price, variant.currency)}</span>
+                        <span className="font-semibold text-[var(--text)]">{variant.name}</span>
+                        <span className="text-xs text-[var(--text-muted)]">{formatPrice(variant.price, variant.currency)}</span>
                       </span>
                     </label>
                   )
@@ -149,10 +149,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
               </div>
             </fieldset>
 
-            <label className="grid gap-2 text-sm font-medium text-[#544a42]">
+            <label className="grid gap-2 text-sm font-medium text-[var(--text)]/85">
               Quantity
               <input
-                className="w-24 rounded-2xl border border-[#e9e1d7] bg-white px-3 py-2 text-sm"
+                className="w-24 rounded-2xl border border-[var(--border)] bg-white px-3 py-2 text-sm"
                 type="number"
                 name="quantity"
                 min="1"
@@ -166,22 +166,22 @@ export default async function ProductDetail({ params }: { params: { id: string }
             </button>
           </form>
         ) : (
-          <div className="rounded-2xl border border-dashed border-[#e7ded2] bg-white/65 p-5 text-sm text-[#8a7b70]">
+          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/70 p-5 text-sm text-[var(--text-muted)]">
             We&apos;re restocking this item. Check back soon!
           </div>
         )}
 
-        <div className="grid gap-4 rounded-2xl bg-[#f9f6ef] p-5 text-sm text-[#544a42]">
+        <div className="grid gap-4 rounded-2xl bg-white/70 p-5 text-sm text-[var(--text)]/80">
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#0f766e]" />
+            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
             Printed on premium, breathable cotton blend.
           </div>
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#d97706]" />
+            <span className="h-2 w-2 rounded-full bg-[#c8b38b]" />
             Packaged and shipped by Printful within 3-5 business days.
           </div>
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#334155]" />
+            <span className="h-2 w-2 rounded-full bg-[#1f2420]" />
             Every dollar of profit is donated to IBD research and patient support.
           </div>
         </div>
