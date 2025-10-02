@@ -2,7 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-body { @apply bg-white text-gray-900; }
+body {
+  @apply bg-[#fefbf6] text-[#1f1d1a];
+  background-image: radial-gradient(circle at top left, rgba(255, 214, 153, 0.25), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(152, 230, 198, 0.25), transparent 50%);
+}
+
 .container { @apply max-w-6xl mx-auto px-4; }
-.btn { @apply inline-flex items-center justify-center rounded-2xl px-4 py-2 border; }
-.card { @apply rounded-2xl border p-4 shadow-sm; }
+
+.btn {
+  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition;
+  @apply bg-[#0d9488] text-white shadow-sm hover:bg-[#0b7f74] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e];
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition;
+  @apply bg-transparent border border-[#d8d1c8] text-[#463e37] hover:bg-[#f6efe6];
+}
+
+.card {
+  @apply rounded-3xl border border-[#ebe4da] bg-white/80 p-6 shadow-[0_20px_40px_-28px_rgba(39,32,24,0.45)];
+  backdrop-filter: blur(6px);
+}
+
+a {
+  @apply transition-colors duration-150;
+}
+
+a:hover {
+  @apply text-[#0f766e];
+}

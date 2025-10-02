@@ -1,11 +1,20 @@
 export default function SuccessPage() {
   return (
-    <div className="max-w-xl mx-auto text-center space-y-3">
-      <h1 className="text-3xl font-bold">Thanks for your order 🎉</h1>
-      <p>We’ve received your payment. You’ll get an email when your order ships.</p>
-      <a className="underline" href="/products">
-        Continue shopping
-      </a>
-    </div>
+    <section className="mx-auto max-w-xl">
+      <div className="card grid gap-4 bg-white/85 text-center">
+        <h1 className="text-3xl font-semibold text-[#1f1d1a]">Thanks for your order 🎉</h1>
+        <p className="text-sm leading-relaxed text-[#544a42]">
+          We&apos;ve received your payment and sent the details to Printful. Expect tracking updates in your inbox soon.
+        </p>
+        <div className="flex justify-center gap-3">
+          <a className="btn" href="/products">
+            Continue shopping
+          </a>
+          <a className="btn-secondary" href="/">
+            Return home
+          </a>
+        </div>
+      </div>
+    </section>
   )
 }

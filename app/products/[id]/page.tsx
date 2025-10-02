@@ -66,38 +66,48 @@ export default async function ProductDetail({ params }: { params: { id: string }
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1.5fr,1fr]">
-      <div className="space-y-6">
-        {heroImage ? (
-          <img
-            src={heroImage}
-            alt={product.name}
-            className="w-full rounded-2xl border object-cover"
-          />
+    <div className="grid gap-10 lg:grid-cols-[1.4fr,1fr]">
+      <div className="relative overflow-hidden rounded-3xl border border-[#efe6d9] bg-white/70 shadow-[0_30px_60px_-45px_rgba(39,31,24,0.55)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(13,148,136,0.12),_transparent_55%)]" />
+        <div className="relative">
+          {heroImage ? (
+            <img src={heroImage} alt={product.name} className="h-[420px] w-full object-cover" />
+          ) : (
+            <div className="flex h-[420px] items-center justify-center text-[#8a7b70]">Imagery coming soon</div>
+          )}
+        </div>
+        {product.description ? (
+          <div className="relative border-t border-[#efe6d9] bg-white/85 p-8">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#8a7b70]">Story</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#544a42]">{product.description}</p>
+          </div>
         ) : null}
-        {product.description ? <p className="text-gray-600 leading-relaxed">{product.description}</p> : null}
       </div>
-      <div className="card space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold">{product.name}</h1>
+
+      <aside className="card space-y-7">
+        <div className="space-y-3">
+          <a className="text-xs font-semibold uppercase tracking-[0.3rem] text-[#8a7b70]" href="/products">
+            ← Back to all tees
+          </a>
+          <h1 className="text-3xl font-semibold text-[#1f1d1a]">{product.name}</h1>
           {defaultVariant ? (
-            <p className="mt-2 text-lg text-gray-600">
+            <p className="text-lg text-[#534941]">
               From {formatPrice(defaultVariant.price, defaultVariant.currency)}
             </p>
           ) : (
-            <p className="mt-2 text-sm text-gray-500">No variants available right now.</p>
+            <p className="text-sm text-[#8a7b70]">No variants available right now.</p>
           )}
         </div>
 
         {variants.length ? (
-          <form action={addToCart} className="grid gap-4">
+          <form action={addToCart} className="grid gap-5">
             <input type="hidden" name="productId" value={product.id} />
-            <label className="grid gap-2 text-sm font-medium">
+            <label className="grid gap-2 text-sm font-medium text-[#544a42]">
               Variant
               <select
                 name="variantId"
                 defaultValue={defaultVariant?.id}
-                className="rounded-xl border px-3 py-2"
+                className="rounded-2xl border border-[#e9e1d7] bg-white px-4 py-2 text-sm text-[#1f1d1a] shadow-inner"
                 required
               >
                 {variants.map((variant) => (
@@ -108,10 +118,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm font-medium">
+            <label className="grid gap-2 text-sm font-medium text-[#544a42]">
               Quantity
               <input
-                className="rounded-xl border px-3 py-2"
+                className="w-24 rounded-2xl border border-[#e9e1d7] bg-white px-3 py-2 text-sm"
                 type="number"
                 name="quantity"
                 min="1"
@@ -120,16 +130,31 @@ export default async function ProductDetail({ params }: { params: { id: string }
               />
             </label>
 
-            <button className="btn mt-2" type="submit">
+            <button className="btn" type="submit">
               Add to cart
             </button>
           </form>
         ) : (
-          <div className="rounded-xl border border-dashed p-4 text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-[#e7ded2] bg-white/65 p-5 text-sm text-[#8a7b70]">
             We&apos;re restocking this item. Check back soon!
           </div>
         )}
-      </div>
+
+        <div className="grid gap-4 rounded-2xl bg-[#f9f6ef] p-5 text-sm text-[#544a42]">
+          <div className="flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-[#0f766e]" />
+            Printed on premium, breathable cotton blend.
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-[#d97706]" />
+            Packaged and shipped by Printful within 3-5 business days.
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-[#334155]" />
+            A portion of every sale funds IBD research.
+          </div>
+        </div>
+      </aside>
     </div>
   )
 }
