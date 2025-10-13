@@ -60,5 +60,24 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const shouldTriggerSync =
+    type === 'product_updated' ||
+    type === 'product_synced' ||
+    type === 'product_created' ||
+    type === 'sync_product_updated'
+
+  if (shouldTriggerSync && process.env.NEXT_PUBLIC_BASE_URL) {
+    try {
+      const syncSecret = process.env.PRINTFUL_SYNC_SECRET ?? process.env.ADMIN_SECRET
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/printful/sync`, {
+        method: 'POST',
+        headers: syncSecret ? { 'x-sync-secret': syncSecret } : undefined,
+        cache: 'no-store'
+      })
+    } catch (err) {
+      console.error('Failed to trigger Printful sync from webhook', err)
+    }
+  }
+
   return NextResponse.json({ ok: true })
 }
