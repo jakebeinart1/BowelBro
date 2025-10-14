@@ -27,21 +27,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className={`${manrope.className} antialiased`}>
-        <header className="border-b border-[rgba(82,121,111,0.35)] bg-[rgba(10,47,31,0.95)] backdrop-blur-xl sticky top-0 z-50 shadow-[0_14px_40px_-28px_rgba(0,0,0,0.55)]">
-          <div className="container flex h-[76px] items-center justify-between gap-6">
-            <Link href="/" className="text-lg font-semibold uppercase tracking-[0.35rem] text-[var(--gold)]">
+        <header className="border-b border-[var(--border-light)] bg-white/90 backdrop-blur sticky top-0 z-50 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+          <div className="container flex h-[72px] items-center justify-between gap-6">
+            <Link href="/" className="text-lg font-semibold uppercase tracking-[0.35rem] text-[var(--green-dark)]">
               Bowel Bro
             </Link>
             <MainNav cartBadge={cartBadge} />
           </div>
         </header>
         <main className="container py-12 lg:py-16">{children}</main>
-        <footer className="border-t border-[rgba(82,121,111,0.35)] bg-[linear-gradient(180deg,rgba(26,77,46,0.9),rgba(10,47,31,0.95))] mt-24">
-          <div className="container flex flex-col gap-3 py-10 text-sm text-[var(--body-text-muted)] sm:flex-row sm:items-center sm:justify-between">
+        <footer className="border-t border-[var(--border-light)] bg-white/80 mt-24 shadow-[0_-2px_6px_rgba(0,0,0,0.04)]">
+          <div className="container flex flex-col gap-3 py-10 text-sm text-[var(--text-secondary)] sm:flex-row sm:items-center sm:justify-between">
             <span>© {new Date().getFullYear()} Bowel Bro · Made with guts.</span>
             <div className="flex gap-4">
-              <a className="hover:text-[var(--accent-green)]" href="/products">Shop</a>
-              <a className="hover:text-[var(--accent-green)]" href="/cart">Cart</a>
+              <a className="hover:text-[var(--green-accent)]" href="/products">Shop</a>
+              <a className="hover:text-[var(--green-accent)]" href="/cart">Cart</a>
             </div>
           </div>
         </footer>

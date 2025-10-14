@@ -50,13 +50,18 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as StripeCheckoutSession
 
-    const cartId = (session.metadata?.cartId ?? '') as string
-    const email = session.customer_details?.email ?? undefined
-    const phone = session.customer_details?.phone ?? undefined
-    const name = session.customer_details?.name ?? undefined
-    const addr = session.shipping_details?.address
-    const currency = (session.currency ?? 'usd').toLowerCase()
-    const total = Number(session.amount_total ?? 0) / 100
+  const cartId = (session.metadata?.cartId ?? '') as string
+  const currency = (session.currency ?? 'usd').toLowerCase()
+  const total = Number(session.amount_total ?? 0) / 100
+
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ['shipping_details']
+  })
+
+  const ship = fullSession.shipping_details?.address || session.shipping_details?.address
+  const name = fullSession.customer_details?.name ?? session.customer_details?.name ?? undefined
+  const email = fullSession.customer_details?.email ?? session.customer_details?.email ?? undefined
+  const phone = fullSession.customer_details?.phone ?? session.customer_details?.phone ?? undefined
 
     const cart = await prisma.cart.findUnique({
       where: { id: cartId },
@@ -64,6 +69,16 @@ export async function POST(req: NextRequest) {
     })
 
     if (!cart || cart.items.length === 0) {
+      return NextResponse.json({ received: true })
+    }
+
+    if (!ship?.line1 || !ship?.city || !ship?.country || !ship?.postal_code) {
+      console.error('Missing shipping address fields from Stripe; cannot create Printful order', {
+        hasLine1: !!ship?.line1,
+        hasCity: !!ship?.city,
+        hasCountry: !!ship?.country,
+        hasPostalCode: !!ship?.postal_code
+      })
       return NextResponse.json({ received: true })
     }
 
@@ -76,12 +91,12 @@ export async function POST(req: NextRequest) {
         shippingEmail: email,
         shippingPhone: phone,
         shippingName: name,
-        shippingLine1: addr?.line1,
-        shippingLine2: addr?.line2 ?? undefined,
-        shippingCity: addr?.city,
-        shippingState: addr?.state ?? undefined,
-        shippingZip: addr?.postal_code ?? undefined,
-        shippingCountry: addr?.country ?? undefined,
+        shippingLine1: ship.line1,
+        shippingLine2: ship.line2 ?? undefined,
+        shippingCity: ship.city,
+        shippingState: ship.state ?? undefined,
+        shippingZip: ship.postal_code ?? undefined,
+        shippingCountry: ship.country ?? undefined,
         items: {
           create: cart.items.map((it) => ({
             variantId: it.variant.id,
@@ -101,15 +116,15 @@ export async function POST(req: NextRequest) {
       const payload: PrintfulOrderRequest = {
         external_id: order.id,
         recipient: {
-          name: name ?? undefined,
-          email: email ?? undefined,
-          phone: phone ?? undefined,
-          address1: addr?.line1 ?? undefined,
-          address2: addr?.line2 ?? undefined,
-          city: addr?.city ?? undefined,
-          state_code: addr?.state ?? undefined,
-          country_code: addr?.country ?? undefined,
-          zip: addr?.postal_code ?? undefined
+          name,
+          email,
+          phone,
+          address1: ship.line1,
+          address2: ship.line2 ?? undefined,
+          city: ship.city!,
+          state_code: ship.state ?? undefined,
+          country_code: ship.country!,
+          zip: ship.postal_code!
         },
         items,
         confirm: true

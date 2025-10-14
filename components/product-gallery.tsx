@@ -21,7 +21,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   if (!images.length) {
     return (
-      <div className="flex aspect-[4/5] items-center justify-center rounded-3xl border border-dashed border-[rgba(82,121,111,0.45)] bg-[rgba(0,0,0,0.25)] text-sm text-[var(--body-text-muted)]">
+      <div className="flex aspect-[4/5] items-center justify-center rounded-3xl border border-dashed border-[var(--border-light)] bg-[var(--bg-soft)] text-sm text-[var(--text-secondary)]">
         Imagery coming soon
       </div>
     )
@@ -29,7 +29,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-3xl border border-[rgba(82,121,111,0.45)] bg-[linear-gradient(155deg,rgba(26,77,46,0.92),rgba(10,47,31,0.9))] shadow-[0_30px_60px_-45px_rgba(0,0,0,0.55)]">
+      <div className="relative overflow-hidden rounded-3xl border border-[var(--border-light)] bg-[var(--bg-surface)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
         <div className="relative aspect-[4/5] w-full">
           <img
             src={activeImage.url}
@@ -42,14 +42,14 @@ export function ProductGallery({ images }: ProductGalleryProps) {
               <button
                 type="button"
                 onClick={showPrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-[rgba(82,121,111,0.45)] bg-[rgba(0,0,0,0.4)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--body-text-muted)] shadow hover:bg-[rgba(39,174,96,0.18)]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--border-light)] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--green-dark)] shadow hover:bg-[var(--bg-soft)]"
               >
                 Prev
               </button>
               <button
                 type="button"
                 onClick={showNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-[rgba(82,121,111,0.45)] bg-[rgba(0,0,0,0.4)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--body-text-muted)] shadow hover:bg-[rgba(39,174,96,0.18)]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--border-light)] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--green-dark)] shadow hover:bg-[var(--bg-soft)]"
               >
                 Next
               </button>
@@ -68,8 +68,8 @@ export function ProductGallery({ images }: ProductGalleryProps) {
               className={clsx(
                 'relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border transition',
                 activeIndex === index
-                  ? 'border-[var(--accent-green)] shadow-[0_10px_25px_-18px_rgba(0,0,0,0.6)]'
-                  : 'border-[rgba(82,121,111,0.25)] hover:border-[rgba(39,174,96,0.45)]'
+                  ? 'border-[var(--green-accent)] shadow-[0_6px_16px_rgba(39,174,96,0.25)]'
+                  : 'border-[var(--border-light)] hover:border-[var(--green-accent)]'
               )}
             >
               <img src={image.url} alt={image.alt} className="h-full w-full object-cover" />

@@ -70,8 +70,8 @@ export default async function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="card surface-elevated grid gap-4 text-center text-[var(--body-text-muted)]">
-        <h1 className="text-3xl font-semibold text-[var(--white)]">Your cart is empty (for now)</h1>
+      <div className="card grid gap-4 text-center text-[var(--text-secondary)]">
+        <h1 className="text-3xl font-semibold text-[var(--green-dark)]">Your cart is empty (for now)</h1>
         <p>Grab a tee that speaks to your gut and give the IBD community a boost.</p>
         <div className="flex justify-center gap-3">
           <a className="btn" href="/products">
@@ -88,9 +88,9 @@ export default async function CartPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
       <div className="space-y-6">
-        <div className="card surface-elevated">
-          <h1 className="text-3xl font-semibold text-[var(--white)]">Your Cart</h1>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--body-text-muted)]">
+        <div className="card">
+          <h1 className="text-3xl font-semibold text-[var(--green-dark)]">Your Cart</h1>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
             Ready when your bowels are. Update quantities, remove items, or head straight to checkout.
           </p>
         </div>
@@ -102,24 +102,24 @@ export default async function CartPage() {
             const image = item.variant.imageUrl ?? item.variant.product.thumbnailUrl ?? null
 
             return (
-              <div key={item.id} className="card flex flex-col gap-4 border-[rgba(82,121,111,0.35)] bg-[linear-gradient(155deg,rgba(26,77,46,0.92),rgba(10,47,31,0.88))] sm:flex-row sm:gap-6">
+              <div key={item.id} className="card flex flex-col gap-4 sm:flex-row sm:gap-6">
                 {image ? (
                   <img
                     src={image}
                     alt={item.variant.name}
-                    className="h-28 w-full rounded-2xl border border-[rgba(82,121,111,0.45)] object-cover sm:h-28 sm:w-28"
+                    className="h-28 w-full rounded-2xl border border-[var(--border-light)] object-cover sm:h-28 sm:w-28"
                   />
                 ) : null}
                 <div className="flex flex-1 flex-col justify-between gap-3">
                   <div>
-                    <p className="text-base font-semibold text-[var(--white)]">{item.variant.product.name}</p>
-                    <p className="text-sm text-[var(--body-text-muted)]">{item.variant.name}</p>
-                    <p className="mt-1 text-sm text-[var(--body-text-muted)]">{formatPrice(price, currency)} each</p>
+                    <p className="text-base font-semibold text-[var(--green-dark)]">{item.variant.product.name}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{item.variant.name}</p>
+                    <p className="mt-1 text-sm text-[var(--text-secondary)]">{formatPrice(price, currency)} each</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--body-text-muted)]">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
                     <form action={updateQuantity} className="flex items-center gap-3">
                       <input type="hidden" name="itemId" value={item.id} />
-                      <label className="flex items-center gap-2 rounded-full bg-[rgba(39,174,96,0.12)] px-3 py-1 text-[var(--white)]">
+                      <label className="flex items-center gap-2 rounded-full border border-[var(--border-light)] bg-white px-3 py-1 text-[var(--green-dark)]">
                         Qty
                         <input
                           name="quantity"
@@ -127,22 +127,22 @@ export default async function CartPage() {
                           min="1"
                           max="99"
                           defaultValue={item.quantity}
-                          className="w-16 rounded-full border border-transparent bg-[rgba(0,0,0,0.35)] px-3 py-1 text-sm text-[var(--body-text)]"
+                          className="w-16 rounded-full border border-[var(--border-light)] bg-white px-3 py-1 text-sm text-[var(--text-primary)]"
                         />
                       </label>
-                      <button type="submit" className="btn-secondary !border-[rgba(39,174,96,0.45)] !px-4 !py-1 text-[11px] uppercase tracking-[0.25rem]">
+                      <button type="submit" className="btn-secondary !px-4 !py-1 text-[11px] uppercase tracking-[0.25rem]">
                         Update
                       </button>
                     </form>
                     <form action={removeItem}>
                       <input type="hidden" name="itemId" value={item.id} />
-                      <button type="submit" className="btn-secondary !border-[rgba(184,115,51,0.45)] !px-4 !py-1 text-[11px] uppercase tracking-[0.25rem] text-[var(--copper)]">
+                      <button type="submit" className="btn-secondary !px-4 !py-1 text-[11px] uppercase tracking-[0.25rem]">
                         Remove
                       </button>
                     </form>
                   </div>
                 </div>
-                <div className="flex items-end justify-end text-right text-base font-semibold text-[var(--white)] sm:min-w-[88px]">
+                <div className="flex items-end justify-end text-right text-base font-semibold text-[var(--green-dark)] sm:min-w-[88px]">
                   {formatPrice(lineTotal, currency)}
                 </div>
               </div>
@@ -151,15 +151,15 @@ export default async function CartPage() {
         </div>
       </div>
 
-      <div className="card h-max space-y-5 border-[rgba(82,121,111,0.45)] bg-[linear-gradient(160deg,rgba(26,77,46,0.92),rgba(10,47,31,0.9))]">
+      <div className="card h-max space-y-5">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--sage)]">Order summary</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--text-secondary)]">Order summary</span>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-sm text-[var(--body-text-muted)]">Subtotal</span>
-            <span className="text-xl font-semibold text-[var(--accent-green)]">{formatPrice(subtotal, currency)}</span>
+            <span className="text-sm text-[var(--text-secondary)]">Subtotal</span>
+            <span className="text-xl font-semibold text-[var(--green-accent)]">{formatPrice(subtotal, currency)}</span>
           </div>
         </div>
-        <p className="text-xs leading-relaxed text-[var(--body-text-muted)]">
+        <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
           Shipping and taxes are calculated at checkout. You&apos;ll confirm on the Stripe page before paying.
         </p>
         <form action={checkout}>
@@ -167,7 +167,7 @@ export default async function CartPage() {
             Checkout with Stripe
           </button>
         </form>
-        <div className="rounded-2xl border border-[rgba(82,121,111,0.35)] bg-[rgba(0,0,0,0.25)] p-4 text-xs text-[var(--body-text-muted)]">
+        <div className="rounded-2xl border border-[var(--border-light)] bg-[var(--peach)]/80 p-4 text-xs text-[var(--text-primary)]">
           Your purchase sends support to IBD research and the community. Thank you for being a fellow Bowel Bro.
         </div>
       </div>
