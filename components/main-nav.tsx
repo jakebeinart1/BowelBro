@@ -40,7 +40,7 @@ export function MainNav({ cartBadge = null }: MainNavProps) {
             className={clsx(
               baseClasses,
               active
-                ? 'bg-[var(--green-accent)] text-white shadow-[0_6px_16px_rgba(39,174,96,0.35)]'
+                ? 'bg-[var(--green-dark)] text-white shadow-[0_6px_16px_rgba(26,77,46,0.25)]'
                 : 'hover:bg-[var(--bg-soft)]'
             )}
           >

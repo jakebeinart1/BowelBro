@@ -34,12 +34,12 @@ body {
 
 .btn {
   @apply inline-flex items-center justify-center rounded-xl px-6 py-2 text-sm font-semibold transition;
-  background: var(--green-accent);
+  background: var(--green-dark);
   color: #ffffff;
   box-shadow: var(--shadow-sm);
 }
 
-.btn:hover { filter: brightness(0.95); }
+.btn:hover { filter: brightness(0.9); }
 
 .btn:focus-visible {
   outline: 2px solid rgba(39, 174, 96, 0.4);
@@ -48,7 +48,7 @@ body {
 
 .btn-secondary {
   @apply inline-flex items-center justify-center rounded-xl px-5 py-2 text-sm font-semibold transition;
-  border: 1px solid var(--green-dark);
+  border: 1px solid rgba(26, 77, 46, 0.45);
   background: var(--bg-soft);
   color: var(--green-dark);
 }
