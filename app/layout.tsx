@@ -1,6 +1,7 @@
 import './globals.css'
 import React from 'react'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { Manrope } from 'next/font/google'
 import { prisma } from '@/lib/db'
@@ -8,7 +9,30 @@ import { MainNav } from '@/components/main-nav'
 
 const manrope = Manrope({ subsets: ['latin'], variable: '--font-sans' })
 
-export const metadata = { title: 'Bowel Bro Shop', description: 'Everyone is a BOWEL BRO. Care for a fellow bowel by buying a shirt, spreading awareness, and donating to IBD research.' }
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://bowelbro.shop'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  title: 'Support IBD Research',
+  description:
+    'Join the Bowel Bro community to fund IBD research and patient support with every tee you share.',
+  openGraph: {
+    title: 'Support IBD Research',
+    description:
+      'Wear your advocacy. Every Bowel Bro purchase funds inflammatory bowel disease research and support.',
+    siteName: 'Bowel Bro',
+    url: '/',
+    type: 'website',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Support IBD Research' }]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Support IBD Research',
+    description:
+      'Share the mission. 100% of profits fuel inflammatory bowel disease research and patient care.',
+    images: ['/opengraph-image']
+  }
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cartCookie = cookies().get('cartId')?.value
