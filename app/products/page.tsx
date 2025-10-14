@@ -8,12 +8,23 @@ import { prisma } from '../../lib/db' // use relative import, no @/ alias needed
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
+    where: { isActive: true, variants: { some: { isEnabled: true } } },
     select: {
       id: true,
       name: true,
       thumbnailUrl: true,
       variants: {
-        select: { id: true, name: true, imageUrl: true, retailPrice: true }
+        where: { isEnabled: true },
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          retailPrice: true,
+          mockups: {
+            select: { url: true, position: true },
+            orderBy: { position: 'asc' }
+          }
+        }
       }
     },
     orderBy: { updatedAt: 'desc' }
@@ -50,7 +61,11 @@ export default async function ProductsPage() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {
-            const preview = product.thumbnailUrl || product.variants[0]?.imageUrl || null
+            const preview =
+              product.thumbnailUrl ||
+              product.variants[0]?.mockups[0]?.url ||
+              product.variants[0]?.imageUrl ||
+              null
             const price = product.variants[0]?.retailPrice
             const samplePrice = price ? Number(price).toFixed(2) : null
 

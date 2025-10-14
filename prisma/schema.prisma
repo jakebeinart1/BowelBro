@@ -30,6 +30,7 @@ model Product {
   name         String
   description  String?
   thumbnailUrl String?
+  isActive     Boolean   @default(true)
   currency     String    @default("usd")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -51,6 +52,18 @@ model Variant {
 
   cartItems  CartItem[]
   orderItems OrderItem[]
+  mockups    VariantMockup[]
+}
+
+model VariantMockup {
+  id        String   @id @default(cuid())
+  variant   Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String
+  url       String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([variantId, url])
 }
 
 model Cart {

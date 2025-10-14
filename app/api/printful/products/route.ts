@@ -18,8 +18,14 @@ function bigIntToString(value: any): any {
 
 export async function GET() {
   const products = await prisma.product.findMany({
-    include: { variants: true },
-    orderBy: { updatedAt: 'desc' },
+    where: { isActive: true },
+    include: {
+      variants: {
+        where: { isEnabled: true },
+        include: { mockups: true }
+      }
+    },
+    orderBy: { updatedAt: 'desc' }
   })
 
   const safe = bigIntToString(products)

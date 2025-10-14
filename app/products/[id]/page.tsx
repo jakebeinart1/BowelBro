@@ -19,12 +19,15 @@ function formatPrice(amount: number, currency: string) {
 }
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
-  const product = await prisma.product.findUnique({
-    where: { id: params.id },
+  const product = await prisma.product.findFirst({
+    where: { id: params.id, isActive: true },
     include: {
       variants: {
         where: { isEnabled: true },
-        orderBy: { name: 'asc' }
+        orderBy: { name: 'asc' },
+        include: {
+          mockups: { orderBy: { position: 'asc' } }
+        }
       }
     }
   })
@@ -35,6 +38,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
     id: variant.id,
     name: variant.name,
     imageUrl: variant.imageUrl ?? product.thumbnailUrl ?? null,
+    mockups: variant.mockups.map((mockup) => mockup.url),
     price: Number(variant.retailPrice),
     currency: (variant.currency || product.currency || 'usd').toUpperCase()
   }))
@@ -50,9 +54,13 @@ export default async function ProductDetail({ params }: { params: { id: string }
   }
 
   for (const variant of variants) {
-    if (variant.imageUrl && !gallerySet.has(variant.imageUrl)) {
-      gallerySet.add(variant.imageUrl)
-      galleryImages.push({ url: variant.imageUrl, alt: `${product.name} – ${variant.name}` })
+    const alt = `${product.name} – ${variant.name}`
+    const sources = variant.mockups.length ? variant.mockups : [variant.imageUrl]
+    for (const url of sources) {
+      if (url && !gallerySet.has(url)) {
+        gallerySet.add(url)
+        galleryImages.push({ url, alt })
+      }
     }
   }
 
@@ -118,7 +126,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
               <legend className="text-[var(--teal)]">Variant</legend>
               <div className="grid gap-2">
                 {variants.map((variant) => {
-                  const primaryImage = variant.imageUrl
+                  const primaryImage = variant.mockups[0] ?? variant.imageUrl
                   return (
                     <label
                       key={variant.id}
