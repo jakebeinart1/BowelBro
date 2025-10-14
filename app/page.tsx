@@ -1,9 +1,9 @@
 export default function HomePage() {
   return (
     <section className="grid gap-12 lg:grid-cols-[1.25fr,0.75fr] lg:items-center">
-      <div className="card surface-elevated">
-        <span className="badge-premium">Bowel Bros Forever</span>
-        <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--white)] sm:text-5xl">
+      <div className="card">
+        <span className="badge-premium text-[var(--green-dark)]">Bowel Bros Forever</span>
+        <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--green-dark)] sm:text-5xl">
           Everyone is a <span className="text-[var(--accent-green)]">BOWEL BRO.</span>
         </h1>
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--body-text-muted)]">
@@ -18,17 +18,17 @@ export default function HomePage() {
           </a>
         </div>
         <dl className="mt-12 grid gap-6 sm:grid-cols-3">
-          <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.1)] p-5 shadow-[0_14px_32px_-24px_rgba(0,0,0,0.45)]">
-            <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--gold)]">Profits</dt>
-            <dd className="mt-3 text-2xl font-semibold text-[var(--white)]">100% donated</dd>
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+            <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Profits</dt>
+            <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">100% donated</dd>
           </div>
-          <div className="rounded-2xl border border-[rgba(82,121,111,0.45)] bg-[rgba(26,77,46,0.85)] p-5 shadow-[0_14px_32px_-24px_rgba(0,0,0,0.45)]">
-            <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--sage)]">Comfort</dt>
-            <dd className="mt-3 text-2xl font-semibold text-[var(--white)]">Butter-soft fabric</dd>
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[#e6ccb2] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+            <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Comfort</dt>
+            <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">Butter-soft fabric</dd>
           </div>
-          <div className="rounded-2xl border border-[rgba(39,174,96,0.45)] bg-[rgba(39,174,96,0.18)] p-5 shadow-[0_14px_32px_-24px_rgba(0,0,0,0.45)]">
-            <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--accent-green)]">Impact</dt>
-            <dd className="mt-3 text-2xl font-semibold text-[var(--white)]">Awareness + research</dd>
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+            <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Impact</dt>
+            <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">Awareness + research</dd>
           </div>
         </dl>
       </div>
@@ -39,18 +39,18 @@ export default function HomePage() {
           <div className="relative flex h-full flex-col justify-between gap-8 p-8">
             <div className="space-y-4">
               <p className="text-sm font-semibold uppercase tracking-[0.35rem] text-[var(--sage)]">IBD Awareness</p>
-              <p className="max-w-xs text-base text-[var(--body-text)]">
-                From playful slogans to bold statements, every design reminds the world to listen to our guts and care for our insides.
-              </p>
+          <p className="max-w-xs text-base text-[var(--text-primary)]">
+            From playful slogans to bold statements, every design reminds the world to listen to our guts and care for our insides.
+          </p>
               <div className="divider-soft" />
             </div>
-            <div className="grid gap-4 text-sm text-[var(--body-text-muted)]">
+            <div className="grid gap-4 text-sm text-[var(--text-secondary)]">
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--accent-green)]" />
+                <span className="h-2 w-2 rounded-full bg-[var(--green-accent)]" />
                 Sustainably printed on demand by Printful.
               </div>
               <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--sage)]" />
+                <span className="h-2 w-2 rounded-full bg-[var(--green-sage)]" />
                 Packed and shipped within 3-5 days worldwide.
               </div>
               <div className="flex items-center gap-3">
