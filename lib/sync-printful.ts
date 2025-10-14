@@ -10,7 +10,15 @@ export async function syncPrintfulProducts(limit = 100) {
   const seenVariantPrintfulIds = new Set<bigint>()
 
   while (true) {
-    const items = await listSyncProducts(limit, offset)
+    let page: Awaited<ReturnType<typeof listSyncProducts>> | null = null
+    try {
+      page = await listSyncProducts(limit, offset)
+    } catch (err) {
+      console.error('Failed to fetch product batch from Printful', err)
+      break
+    }
+
+    const items = page?.items ?? []
     if (!items.length) break
 
     for (const item of items) {
@@ -26,12 +34,14 @@ export async function syncPrintfulProducts(limit = 100) {
           update: {
             name: prod?.name ?? item.name ?? 'Unnamed',
             thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined,
+            description: prod?.description ?? undefined,
             isActive: true
           },
           create: {
             printfulId: productIdBI,
             name: prod?.name ?? item.name ?? 'Unnamed',
             thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined,
+            description: prod?.description ?? undefined,
             isActive: true
           }
         })
@@ -82,7 +92,19 @@ export async function syncPrintfulProducts(limit = 100) {
       }
     }
 
-    offset += items.length
+    const paging = page?.paging
+    if (!paging) break
+
+    const nextOffset = paging.offset + items.length
+    const hasMore = nextOffset < paging.total || items.length === paging.limit
+    if (!hasMore) break
+
+    if (nextOffset <= paging.offset) {
+      console.warn('[printful] Received non-incrementing paging data; stopping to avoid infinite loop.')
+      break
+    }
+
+    offset = nextOffset
   }
 
   const productIdList = Array.from(seenProductPrintfulIds)
@@ -98,7 +120,7 @@ export async function syncPrintfulProducts(limit = 100) {
       where: { printfulId: { in: productIdList } }
     })
   } else {
-    await prisma.product.updateMany({ data: { isActive: false } })
+    console.warn('No products returned from Printful sync; skipping product deactivation to prevent unintended removal.')
   }
 
   if (variantIdList.length) {
@@ -111,7 +133,7 @@ export async function syncPrintfulProducts(limit = 100) {
       where: { printfulId: { in: variantIdList } }
     })
   } else {
-    await prisma.variant.updateMany({ data: { isEnabled: false } })
+    console.warn('No variants returned from Printful sync; skipping variant deactivation to prevent unintended removal.')
   }
 
   return { processed }

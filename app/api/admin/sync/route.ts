@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
   const limit = 100
 
   while (true) {
-    const items = await listSyncProducts(limit, offset)
+    const page = await listSyncProducts(limit, offset)
+    const items = page.items
     if (!items.length) break
 
     for (const item of items) {
@@ -28,12 +29,14 @@ export async function POST(req: NextRequest) {
         where: { printfulId: BigInt(String(item.id)) },
         update: {
           name: prod?.name ?? item.name ?? 'Unnamed',
-          thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined
+          thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined,
+          description: prod?.description ?? undefined
         },
         create: {
           printfulId: BigInt(String(item.id)),
           name: prod?.name ?? item.name ?? 'Unnamed',
-          thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined
+          thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined,
+          description: prod?.description ?? undefined
         }
       })
 
@@ -59,7 +62,15 @@ export async function POST(req: NextRequest) {
       total++
     }
 
-    offset += items.length
+    const paging = page.paging
+    const nextOffset = paging.offset + items.length
+    const hasMore = nextOffset < paging.total || items.length === paging.limit
+    if (!hasMore || nextOffset <= paging.offset) {
+      offset = Math.max(nextOffset, paging.total)
+      break
+    }
+
+    offset = nextOffset
   }
 
   return NextResponse.json({ ok: true, total })
