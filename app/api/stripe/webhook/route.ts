@@ -50,18 +50,40 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as StripeCheckoutSession
 
-  const cartId = (session.metadata?.cartId ?? '') as string
-  const currency = (session.currency ?? 'usd').toLowerCase()
-  const total = Number(session.amount_total ?? 0) / 100
+    const cartId = (session.metadata?.cartId ?? '') as string
+    const currency = (session.currency ?? 'usd').toLowerCase()
+    const total = Number(session.amount_total ?? 0) / 100
 
-  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ['shipping_details']
-  })
+    let shippingAddress = session.shipping_details?.address
+    const name = session.customer_details?.name ?? undefined
+    const email = session.customer_details?.email ?? undefined
+    const phone = session.customer_details?.phone ?? undefined
 
-  const ship = fullSession.shipping_details?.address || session.shipping_details?.address
-  const name = fullSession.customer_details?.name ?? session.customer_details?.name ?? undefined
-  const email = fullSession.customer_details?.email ?? session.customer_details?.email ?? undefined
-  const phone = fullSession.customer_details?.phone ?? session.customer_details?.phone ?? undefined
+    if (!shippingAddress && session.payment_intent) {
+      try {
+        const paymentIntentId =
+          typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : session.payment_intent.id
+
+        if (paymentIntentId) {
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+          shippingAddress = paymentIntent.shipping?.address ?? undefined
+        }
+      } catch (err) {
+        console.error('Failed to retrieve payment intent for fallback shipping address', err)
+      }
+    }
+
+    if (!shippingAddress?.line1 || !shippingAddress?.city || !shippingAddress?.country || !shippingAddress?.postal_code) {
+      console.error('Missing shipping address fields from Stripe; cannot create Printful order', {
+        hasLine1: !!shippingAddress?.line1,
+        hasCity: !!shippingAddress?.city,
+        hasCountry: !!shippingAddress?.country,
+        hasPostalCode: !!shippingAddress?.postal_code
+      })
+      return NextResponse.json({ received: true })
+    }
 
     const cart = await prisma.cart.findUnique({
       where: { id: cartId },
@@ -69,16 +91,6 @@ export async function POST(req: NextRequest) {
     })
 
     if (!cart || cart.items.length === 0) {
-      return NextResponse.json({ received: true })
-    }
-
-    if (!ship?.line1 || !ship?.city || !ship?.country || !ship?.postal_code) {
-      console.error('Missing shipping address fields from Stripe; cannot create Printful order', {
-        hasLine1: !!ship?.line1,
-        hasCity: !!ship?.city,
-        hasCountry: !!ship?.country,
-        hasPostalCode: !!ship?.postal_code
-      })
       return NextResponse.json({ received: true })
     }
 
@@ -91,12 +103,12 @@ export async function POST(req: NextRequest) {
         shippingEmail: email,
         shippingPhone: phone,
         shippingName: name,
-        shippingLine1: ship.line1,
-        shippingLine2: ship.line2 ?? undefined,
-        shippingCity: ship.city,
-        shippingState: ship.state ?? undefined,
-        shippingZip: ship.postal_code ?? undefined,
-        shippingCountry: ship.country ?? undefined,
+        shippingLine1: shippingAddress.line1,
+        shippingLine2: shippingAddress.line2 ?? undefined,
+        shippingCity: shippingAddress.city,
+        shippingState: shippingAddress.state ?? undefined,
+        shippingZip: shippingAddress.postal_code ?? undefined,
+        shippingCountry: shippingAddress.country ?? undefined,
         items: {
           create: cart.items.map((it) => ({
             variantId: it.variant.id,
@@ -119,12 +131,12 @@ export async function POST(req: NextRequest) {
           name,
           email,
           phone,
-          address1: ship.line1,
-          address2: ship.line2 ?? undefined,
-          city: ship.city!,
-          state_code: ship.state ?? undefined,
-          country_code: ship.country!,
-          zip: ship.postal_code!
+          address1: shippingAddress.line1,
+          address2: shippingAddress.line2 ?? undefined,
+          city: shippingAddress.city!,
+          state_code: shippingAddress.state ?? undefined,
+          country_code: shippingAddress.country!,
+          zip: shippingAddress.postal_code!
         },
         items,
         confirm: true
