@@ -36,7 +36,7 @@ export default async function ProductsPage() {
   return (
     <div className="grid gap-10">
       <header className="grid gap-4 rounded-3xl border border-[var(--border-light)] bg-white p-8 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-        <span className="badge-premium text-[var(--green-dark)]">Shop the drop</span>
+        <span className="badge-premium text-[#0b2a1b]">Shop the drop</span>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-semibold text-[var(--green-dark)]">Fresh tees for every Bowel Bro</h1>

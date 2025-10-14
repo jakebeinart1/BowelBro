@@ -2,7 +2,7 @@ export default function HomePage() {
   return (
     <section className="grid gap-12 lg:grid-cols-[1.25fr,0.75fr] lg:items-center">
       <div className="card">
-        <span className="badge-premium text-[var(--green-dark)]">Bowel Bros Forever</span>
+        <span className="badge-premium text-[#0b2a1b]">Bowel Bros Forever</span>
         <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--green-dark)] sm:text-5xl">
           Everyone is a <span className="text-[var(--accent-green)]">BOWEL BRO.</span>
         </h1>
@@ -22,7 +22,7 @@ export default function HomePage() {
             <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Profits</dt>
             <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">100% donated</dd>
           </div>
-          <div className="rounded-2xl border border-[var(--border-light)] bg-[#e6ccb2] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[#f4dec9] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
             <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Comfort</dt>
             <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">Butter-soft fabric</dd>
           </div>
@@ -67,19 +67,19 @@ export default function HomePage() {
           <h2 className="text-2xl font-semibold text-[var(--green-dark)]">Why we do what we do</h2>
           <div className="grid gap-6 sm:grid-cols-3">
             <article className="rounded-2xl border border-[var(--border-light)] bg-white p-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--green-dark)]">Support</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#145c36]">Support</h3>
               <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
                 100% of profits are donated to organizations advancing inflammatory bowel disease research and patient care.
               </p>
             </article>
             <article className="rounded-2xl border border-[var(--border-light)] bg-white p-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--green-dark)]">Community</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#2f3f8f]">Community</h3>
               <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
                 We’re building a loud, proud crew who celebrate gutsy stories and normalise digestive health conversations.
               </p>
             </article>
             <article className="rounded-2xl border border-[var(--border-light)] bg-white p-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--green-dark)]">Awareness</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#a04a24]">Awareness</h3>
               <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
                 Bold designs spark conversations—because taboos disappear when we share what life with IBD looks like.
               </p>
