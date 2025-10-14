@@ -3,80 +3,113 @@
 @tailwind utilities;
 
 :root {
-  --sand: #fdf0d5;
-  --sand-deep: #f6d6a8;
-  --sky: #dae9f5;
-  --mist: #eef6f1;
-  --surface: #ffffff;
-  --surface-muted: rgba(255, 255, 255, 0.9);
-  --border: #e3cfba;
-  --text: #1f1b18;
-  --text-muted: #5d5852;
-  --forest: #344e41;
-  --teal: #3d8b84;
-  --terracotta: #d9856a;
-  --plum: #575279;
-  --charcoal: #22323a;
-  --accent: var(--forest);
-  --accent-alt: var(--teal);
-  --accent-warm: var(--terracotta);
+  --forest-deep: #0a2f1f;
+  --forest-rich: #1a4d2e;
+  --accent-green: #27ae60;
+  --sage: #52796f;
+  --white: #ffffff;
+  --cream: #f8f6f4;
+  --soft-gray: #e8e6e3;
+  --charcoal: #1c1c1c;
+  --black: #000000;
+  --gold: #d4af37;
+  --copper: #b87333;
+  --body-text: rgba(255, 255, 255, 0.92);
+  --body-text-muted: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(82, 121, 111, 0.45);
+  --shadow-low: 0 4px 12px rgba(0, 0, 0, 0.24);
+  --shadow-mid: 0 8px 24px rgba(0, 0, 0, 0.32);
+  --shadow-high: 0 16px 40px rgba(0, 0, 0, 0.4);
+  /* legacy aliases */
+  --forest: var(--forest-rich);
+  --teal: var(--accent-green);
+  --accent: var(--accent-green);
+  --text: var(--body-text);
+  --text-muted: var(--body-text-muted);
 }
 
 body {
   @apply text-base leading-relaxed;
-  background-image: radial-gradient(circle at 0% 0%, rgba(217, 133, 106, 0.18), transparent 52%),
-    radial-gradient(circle at 90% 15%, rgba(61, 139, 132, 0.18), transparent 55%),
-    linear-gradient(135deg, var(--sand) 0%, var(--mist) 45%, #ffffff 100%);
-  background-attachment: fixed;
-  color: var(--text);
+  background: radial-gradient(circle at 10% 10%, rgba(82, 121, 111, 0.35), transparent 60%),
+    radial-gradient(circle at 80% 0%, rgba(39, 174, 96, 0.25), transparent 55%),
+    linear-gradient(155deg, var(--forest-deep) 0%, #0b251a 50%, #061912 100%);
+  color: var(--body-text);
+  min-height: 100vh;
 }
 
 .container { @apply max-w-6xl mx-auto px-4; }
 
 .btn {
-  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold shadow-lg transition;
-  background-image: linear-gradient(135deg, var(--forest), var(--teal));
-  color: #ffffff;
+  @apply inline-flex items-center justify-center rounded-full px-6 py-2 text-sm font-semibold transition;
+  background-image: linear-gradient(135deg, var(--accent-green), #36c375);
+  color: var(--white);
+  box-shadow: var(--shadow-mid);
 }
 
 .btn:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.08);
 }
 
 .btn:focus-visible {
-  outline: 2px solid rgba(61, 139, 132, 0.6);
+  outline: 2px solid rgba(39, 174, 96, 0.75);
   outline-offset: 2px;
 }
 
 .btn-secondary {
   @apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition;
-  border: 1px solid rgba(52, 78, 65, 0.18);
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(253, 240, 213, 0.85));
-  color: var(--forest);
+  border: 1px solid rgba(82, 121, 111, 0.45);
+  background-color: transparent;
+  color: var(--body-text);
 }
 
 .btn-secondary:hover {
-  border-color: rgba(61, 139, 132, 0.5);
-  color: var(--teal);
+  background-color: rgba(39, 174, 96, 0.12);
+  border-color: rgba(39, 174, 96, 0.6);
+  color: var(--accent-green);
 }
 
 .btn-secondary:focus-visible {
-  outline: 2px solid rgba(61, 139, 132, 0.35);
+  outline: 2px solid rgba(39, 174, 96, 0.4);
   outline-offset: 2px;
 }
 
 .card {
-  @apply rounded-3xl border p-6 shadow-[0_30px_65px_-40px_rgba(25,22,18,0.55)];
-  border-color: rgba(31, 27, 24, 0.08);
-  background: radial-gradient(circle at top, rgba(250, 248, 243, 0.95), rgba(255, 255, 255, 0.88));
-  backdrop-filter: blur(10px);
+  @apply rounded-3xl border p-6 transition duration-200;
+  border-color: var(--card-border);
+  background: linear-gradient(170deg, rgba(26, 77, 46, 0.92), rgba(10, 47, 31, 0.92));
+  box-shadow: var(--shadow-low);
+  color: var(--body-text);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-mid);
+  transform: translateY(-2px);
 }
 
 a {
-  @apply transition-colors duration-150;
+  @apply transition-colors duration-200;
   color: inherit;
 }
 
 a:hover {
-  color: var(--accent);
+  color: var(--accent-green);
 }
+
+.badge-premium {
+  @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.3rem];
+  background-color: rgba(212, 175, 55, 0.15);
+  color: var(--gold);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.surface-elevated {
+  background: linear-gradient(150deg, rgba(26, 77, 46, 0.9), rgba(10, 47, 31, 0.95));
+  box-shadow: var(--shadow-high);
+}
+
+.divider-soft {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.text-muted { color: var(--body-text-muted); }

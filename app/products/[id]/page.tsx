@@ -97,59 +97,59 @@ export default async function ProductDetail({ params }: { params: { id: string }
       <div className="space-y-6">
         <ProductGallery images={galleryImages} />
         {product.description ? (
-          <div className="rounded-3xl border border-[var(--border)] bg-white/85 p-8 shadow-[0_20px_45px_-36px_rgba(22,20,18,0.55)]">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--text-muted)]">Story</h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--text)]/80">{product.description}</p>
+          <div className="rounded-3xl border border-[rgba(82,121,111,0.45)] bg-[linear-gradient(160deg,rgba(26,77,46,0.92),rgba(10,47,31,0.9))] p-8 shadow-[0_24px_55px_-32px_rgba(0,0,0,0.55)]">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--sage)]">Story</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--body-text-muted)]">{product.description}</p>
           </div>
         ) : null}
       </div>
 
-      <aside className="card space-y-7 bg-[linear-gradient(140deg,rgba(218,233,245,0.7),rgba(253,240,213,0.7))]">
+      <aside className="card space-y-7 border-[rgba(82,121,111,0.45)] bg-[linear-gradient(150deg,rgba(26,77,46,0.9),rgba(10,47,31,0.95))]">
         <div className="space-y-3">
-          <a className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--text-muted)]" href="/products">
+          <a className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--sage)]" href="/products">
             ← Back to all tees
           </a>
-          <h1 className="text-3xl font-semibold text-[var(--accent)]">{product.name}</h1>
+          <h1 className="text-3xl font-semibold text-[var(--white)]">{product.name}</h1>
           {defaultVariant ? (
-            <p className="text-lg text-[var(--text)]/85">
+            <p className="text-lg text-[var(--body-text-muted)]">
               From {formatPrice(defaultVariant.price, defaultVariant.currency)}
             </p>
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">No variants available right now.</p>
+            <p className="text-sm text-[var(--sage)]">No variants available right now.</p>
           )}
         </div>
 
         {variants.length ? (
           <form action={addToCart} className="grid gap-5">
             <input type="hidden" name="productId" value={product.id} />
-            <fieldset className="grid gap-3 text-sm font-medium text-[var(--text)]/85">
-              <legend className="text-[var(--teal)]">Variant</legend>
+            <fieldset className="grid gap-3 text-sm font-medium text-[var(--body-text-muted)]">
+              <legend className="text-[var(--accent-green)]">Variant</legend>
               <div className="grid gap-2">
                 {variants.map((variant) => {
                   const primaryImage = variant.mockups[0] ?? variant.imageUrl
                   return (
                     <label
                       key={variant.id}
-                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--accent)]/40"
+                      className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[rgba(82,121,111,0.45)] bg-[rgba(0,0,0,0.35)] px-3 py-2 shadow-[0_12px_28px_-22px_rgba(0,0,0,0.6)] transition hover:border-[var(--accent-green)]/60 hover:bg-[rgba(39,174,96,0.12)]"
                     >
                       <input
                         type="radio"
                         name="variantId"
                         value={variant.id}
                         defaultChecked={variant.id === defaultVariant?.id}
-                        className="accent-[#344e41]"
+                        className="accent-[var(--accent-green)]"
                         required
                       />
                       {primaryImage ? (
                         <img src={primaryImage} alt={variant.name} className="h-12 w-12 rounded-xl object-cover" />
                       ) : (
-                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgba(52,78,65,0.08)] text-[10px] uppercase text-[var(--text-muted)]">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgba(82,121,111,0.25)] text-[10px] uppercase text-[var(--sage)]">
                           No Img
                         </span>
                       )}
                       <span className="flex flex-1 flex-col">
-                        <span className="font-semibold text-[var(--text)]">{variant.name}</span>
-                        <span className="text-xs text-[var(--text-muted)]">{formatPrice(variant.price, variant.currency)}</span>
+                        <span className="font-semibold text-[var(--white)]">{variant.name}</span>
+                        <span className="text-xs text-[var(--body-text-muted)]">{formatPrice(variant.price, variant.currency)}</span>
                       </span>
                     </label>
                   )
@@ -157,10 +157,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
               </div>
             </fieldset>
 
-            <label className="grid gap-2 text-sm font-medium text-[var(--teal)]">
+            <label className="grid gap-2 text-sm font-medium text-[var(--accent-green)]">
               Quantity
               <input
-                className="w-24 rounded-2xl border border-[var(--border)] bg-white px-3 py-2 text-sm"
+                className="w-24 rounded-2xl border border-[rgba(82,121,111,0.45)] bg-[rgba(0,0,0,0.3)] px-3 py-2 text-sm text-[var(--body-text)]"
                 type="number"
                 name="quantity"
                 min="1"
@@ -174,22 +174,22 @@ export default async function ProductDetail({ params }: { params: { id: string }
             </button>
           </form>
         ) : (
-          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/70 p-5 text-sm text-[var(--text-muted)]">
+          <div className="rounded-2xl border border-dashed border-[rgba(82,121,111,0.45)] bg-[rgba(0,0,0,0.25)] p-5 text-sm text-[var(--body-text-muted)]">
             We&apos;re restocking this item. Check back soon!
           </div>
         )}
 
-        <div className="grid gap-4 rounded-2xl bg-white/70 p-5 text-sm text-[var(--text)]/80">
+        <div className="grid gap-4 rounded-2xl bg-[rgba(0,0,0,0.25)] p-5 text-sm text-[var(--body-text-muted)]">
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
+            <span className="h-2 w-2 rounded-full bg-[var(--accent-green)]" />
             Printed on premium, breathable cotton blend.
           </div>
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[rgba(217,133,106,0.6)]" />
+            <span className="h-2 w-2 rounded-full bg-[var(--sage)]" />
             Packaged and shipped by Printful within 3-5 business days.
           </div>
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[rgba(34,50,57,0.7)]" />
+            <span className="h-2 w-2 rounded-full bg-[var(--gold)]" />
             Every dollar of profit is donated to IBD research and patient support.
           </div>
         </div>
