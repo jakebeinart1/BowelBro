@@ -18,15 +18,15 @@ export default function HomePage() {
           </a>
         </div>
         <dl className="mt-12 grid gap-6 sm:grid-cols-3">
-          <div className="rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[#e1f2e7] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
             <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Profits</dt>
             <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">100% donated</dd>
           </div>
-          <div className="rounded-2xl border border-[var(--border-light)] bg-[#f4dec9] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[#fff4d4] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
             <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Comfort</dt>
             <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">Butter-soft fabric</dd>
           </div>
-          <div className="rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+          <div className="rounded-2xl border border-[var(--border-light)] bg-[#f3e6d8] p-5 shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
             <dt className="text-xs uppercase tracking-[0.28rem] text-[var(--green-dark)]">Impact</dt>
             <dd className="mt-3 text-2xl font-semibold text-[var(--green-dark)]">Awareness + research</dd>
           </div>
