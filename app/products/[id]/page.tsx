@@ -1,6 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/db'
+import { retry } from '@/lib/retry'
 import { addVariantToCart } from '@/lib/cart'
 import { ProductGallery } from '@/components/product-gallery'
 
@@ -19,18 +20,20 @@ function formatPrice(amount: number, currency: string) {
 }
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
-  const product = await prisma.product.findFirst({
-    where: { id: params.id, isActive: true },
-    include: {
-      variants: {
-        where: { isEnabled: true },
-        orderBy: { name: 'asc' },
-        include: {
-          mockups: { orderBy: { position: 'asc' } }
+  const product = await retry(() =>
+    prisma.product.findFirst({
+      where: { id: params.id, isActive: true },
+      include: {
+        variants: {
+          where: { isEnabled: true },
+          orderBy: { name: 'asc' },
+          include: {
+            mockups: { orderBy: { position: 'asc' } }
+          }
         }
       }
-    }
-  })
+    })
+  )
 
   if (!product) notFound()
 

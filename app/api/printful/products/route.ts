@@ -2,6 +2,7 @@
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { retry } from '@/lib/retry'
 
 // Deeply convert BigInt -> string so JSON.stringify won't explode
 function bigIntToString(value: any): any {
@@ -16,17 +17,21 @@ function bigIntToString(value: any): any {
   return value
 }
 
+export const runtime = 'nodejs'
+
 export async function GET() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    include: {
-      variants: {
-        where: { isEnabled: true },
-        include: { mockups: true }
-      }
-    },
-    orderBy: { updatedAt: 'desc' }
-  })
+  const products = await retry(() =>
+    prisma.product.findMany({
+      where: { isActive: true },
+      include: {
+        variants: {
+          where: { isEnabled: true },
+          include: { mockups: true }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    })
+  )
 
   const safe = bigIntToString(products)
   return NextResponse.json({ products: safe })

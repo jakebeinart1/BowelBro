@@ -5,30 +5,33 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 import { prisma } from '../../lib/db' // use relative import, no @/ alias needed
+import { retry } from '../../lib/retry'
 
 export default async function ProductsPage() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true, variants: { some: { isEnabled: true } } },
-    select: {
-      id: true,
-      name: true,
-      thumbnailUrl: true,
-      variants: {
-        where: { isEnabled: true },
-        select: {
-          id: true,
-          name: true,
-          imageUrl: true,
-          retailPrice: true,
-          mockups: {
-            select: { url: true, position: true },
-            orderBy: { position: 'asc' }
+  const products = await retry(() =>
+    prisma.product.findMany({
+      where: { isActive: true, variants: { some: { isEnabled: true } } },
+      select: {
+        id: true,
+        name: true,
+        thumbnailUrl: true,
+        variants: {
+          where: { isEnabled: true },
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+            retailPrice: true,
+            mockups: {
+              select: { url: true, position: true },
+              orderBy: { position: 'asc' }
+            }
           }
         }
-      }
-    },
-    orderBy: { updatedAt: 'desc' }
-  })
+      },
+      orderBy: { updatedAt: 'desc' }
+    })
+  )
 
   return (
     <div className="grid gap-10">
