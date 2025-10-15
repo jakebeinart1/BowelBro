@@ -61,7 +61,7 @@ export default async function ProductsPage() {
           <p>No products yet—run the admin sync to pull in your Printful catalog.</p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto grid w-full max-w-[1080px] gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {
             const fallbackCandidates = [
               product.thumbnailUrl,
