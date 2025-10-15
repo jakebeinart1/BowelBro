@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { retry } from '@/lib/retry'
+import { getAvailableMockupViews, getMockupPath, getPrimaryMockupImage } from '@/lib/mockup-images'
 
 // Deeply convert BigInt -> string so JSON.stringify won't explode
 function bigIntToString(value: any): any {
@@ -33,6 +34,26 @@ export async function GET() {
     })
   )
 
-  const safe = bigIntToString(products)
+  const enriched = products.map((product) => {
+    const fallbackSources = [
+      product.thumbnailUrl,
+      ...product.variants.flatMap((variant) => [
+        variant.imageUrl,
+        ...variant.mockups.map((mockup) => mockup.url)
+      ])
+    ]
+    const views = getAvailableMockupViews(product.name)
+    const primary = getPrimaryMockupImage(product.name, fallbackSources)
+
+    return {
+      ...product,
+      customMockups: {
+        views: views.map((view) => ({ view, url: getMockupPath(product.name, view) })),
+        primaryImage: primary
+      }
+    }
+  })
+
+  const safe = bigIntToString(enriched)
   return NextResponse.json({ products: safe })
 }

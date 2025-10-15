@@ -34,7 +34,12 @@ export function ProductGallery({ images }: ProductGalleryProps) {
           <img
             src={activeImage.url}
             alt={activeImage.alt}
-            loading="lazy"
+            loading={activeIndex === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            fetchPriority={activeIndex === 0 ? 'high' : 'auto'}
+            width={800}
+            height={1000}
+            sizes="(min-width: 1024px) 60vw, 90vw"
             className="h-full w-full object-cover"
           />
           {images.length > 1 ? (
@@ -65,6 +70,8 @@ export function ProductGallery({ images }: ProductGalleryProps) {
               key={image.url + index}
               type="button"
               onClick={() => setActiveIndex(index)}
+              aria-label={image.alt}
+              aria-current={activeIndex === index ? 'true' : undefined}
               className={clsx(
                 'relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border transition',
                 activeIndex === index
@@ -72,7 +79,15 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                   : 'border-[var(--border-light)] hover:border-[var(--green-accent)]'
               )}
             >
-              <img src={image.url} alt={image.alt} className="h-full w-full object-cover" />
+              <img
+                src={image.url}
+                alt={image.alt}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                width={160}
+                height={200}
+                className="h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>

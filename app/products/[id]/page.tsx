@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { retry } from '@/lib/retry'
 import { addVariantToCart } from '@/lib/cart'
 import { ProductGallery } from '@/components/product-gallery'
+import { buildMockupGallery, getMockupPlaceholder, getProductImage, MOCKUP_VIEWS } from '@/lib/mockup-images'
 
 export const runtime = 'nodejs'
 
@@ -40,7 +41,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
   const variants = product.variants.map((variant) => ({
     id: variant.id,
     name: variant.name,
-    imageUrl: variant.imageUrl ?? product.thumbnailUrl ?? null,
+    imageUrl: getProductImage(product.name, 'front', variant.imageUrl ?? product.thumbnailUrl ?? undefined),
     mockups: variant.mockups.map((mockup) => mockup.url),
     price: Number(variant.retailPrice),
     currency: (variant.currency || product.currency || 'usd').toUpperCase()
@@ -48,27 +49,26 @@ export default async function ProductDetail({ params }: { params: { id: string }
 
   const defaultVariant = variants[0]
 
-  const gallerySet = new Set<string>()
-  const galleryImages: Array<{ url: string; alt: string }> = []
+  const fallbackGallerySources = [
+    product.thumbnailUrl,
+    ...product.variants.flatMap((variant) => [variant.imageUrl, ...variant.mockups.map((mockup) => mockup.url)])
+  ]
 
-  if (product.thumbnailUrl) {
-    gallerySet.add(product.thumbnailUrl)
-    galleryImages.push({ url: product.thumbnailUrl, alt: `${product.name} thumbnail` })
-  }
+  const galleryEntries = buildMockupGallery(product.name, fallbackGallerySources)
 
-  for (const variant of variants) {
-    const alt = `${product.name} – ${variant.name}`
-    const sources = variant.mockups.length ? variant.mockups : [variant.imageUrl]
-    for (const url of sources) {
-      if (url && !gallerySet.has(url)) {
-        gallerySet.add(url)
-        galleryImages.push({ url, alt })
-      }
+  const galleryImages = galleryEntries.map(({ view, url }) => {
+    const canonicalView = MOCKUP_VIEWS.find((candidate) => candidate === view) ?? null
+    const labelledView = canonicalView
+      ? canonicalView.charAt(0).toUpperCase() + canonicalView.slice(1).replace(/-/g, ' ')
+      : 'Mockup'
+    return {
+      url,
+      alt: `${product.name} – ${labelledView}`
     }
-  }
+  })
 
-  if (!galleryImages.length && defaultVariant?.imageUrl) {
-    galleryImages.push({ url: defaultVariant.imageUrl, alt: product.name })
+  if (!galleryImages.length) {
+    galleryImages.push({ url: getMockupPlaceholder(), alt: `${product.name} mockup coming soon` })
   }
 
   async function addToCart(formData: FormData) {
@@ -129,7 +129,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
               <legend className="text-[var(--green-dark)]">Variant</legend>
               <div className="grid gap-2">
                 {variants.map((variant) => {
-                  const primaryImage = variant.mockups[0] ?? variant.imageUrl
+                  const primaryImage = getProductImage(product.name, 'front', variant.mockups[0] ?? variant.imageUrl ?? undefined)
                   return (
                     <label
                       key={variant.id}
@@ -144,7 +144,15 @@ export default async function ProductDetail({ params }: { params: { id: string }
                         required
                       />
                       {primaryImage ? (
-                        <img src={primaryImage} alt={variant.name} className="h-12 w-12 rounded-xl object-cover" />
+                        <img
+                          src={primaryImage}
+                          alt={`${variant.name} front mockup`}
+                          loading="lazy"
+                          decoding="async"
+                          width={120}
+                          height={120}
+                          className="h-12 w-12 rounded-xl object-cover"
+                        />
                       ) : (
                         <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-soft)] text-[10px] uppercase text-[var(--text-secondary)]">
                           No Img

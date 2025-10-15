@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { getCartWithItems, updateCartItemQuantity, removeCartItem } from '@/lib/cart'
 import { createCheckoutSession } from '@/lib/checkout'
 import { getRequestOrigin } from '@/lib/origin'
+import { getProductImage } from '@/lib/mockup-images'
 
 export const runtime = 'nodejs'
 
@@ -99,17 +100,23 @@ export default async function CartPage() {
           {items.map((item) => {
             const price = Number(item.variant.retailPrice ?? 0)
             const lineTotal = price * item.quantity
-            const image = item.variant.imageUrl ?? item.variant.product.thumbnailUrl ?? null
+            const image = getProductImage(
+              item.variant.product.name,
+              'front',
+              item.variant.imageUrl ?? item.variant.product.thumbnailUrl ?? undefined
+            )
 
             return (
               <div key={item.id} className="card flex flex-col gap-4 sm:flex-row sm:gap-6">
-                {image ? (
-                  <img
-                    src={image}
-                    alt={item.variant.name}
-                    className="h-28 w-full rounded-2xl border border-[var(--border-light)] object-cover sm:h-28 sm:w-28"
-                  />
-                ) : null}
+                <img
+                  src={image}
+                  alt={`${item.variant.product.name} – ${item.variant.name}`}
+                  loading="lazy"
+                  decoding="async"
+                  width={160}
+                  height={160}
+                  className="h-28 w-full rounded-2xl border border-[var(--border-light)] object-cover sm:h-28 sm:w-28"
+                />
                 <div className="flex flex-1 flex-col justify-between gap-3">
                   <div>
                     <p className="text-base font-semibold text-[var(--green-dark)]">{item.variant.product.name}</p>

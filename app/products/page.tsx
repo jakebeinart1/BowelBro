@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 
 import { prisma } from '../../lib/db' // use relative import, no @/ alias needed
 import { retry } from '../../lib/retry'
+import { getPrimaryMockupImage } from '../../lib/mockup-images'
 
 export default async function ProductsPage() {
   const products = await retry(() =>
@@ -62,11 +63,14 @@ export default async function ProductsPage() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {
-            const preview =
-              product.thumbnailUrl ||
-              product.variants[0]?.mockups[0]?.url ||
-              product.variants[0]?.imageUrl ||
-              null
+            const fallbackCandidates = [
+              product.thumbnailUrl,
+              ...product.variants.flatMap((variant) => [
+                variant.mockups[0]?.url,
+                variant.imageUrl
+              ])
+            ]
+            const preview = getPrimaryMockupImage(product.name, fallbackCandidates)
             const price = product.variants[0]?.retailPrice
             const samplePrice = price ? Number(price).toFixed(2) : null
 
@@ -76,7 +80,12 @@ export default async function ProductsPage() {
                   {preview ? (
                     <img
                       src={preview}
-                      alt={product.name}
+                      alt={`${product.name} – front mockup`}
+                      loading="lazy"
+                      decoding="async"
+                      width={800}
+                      height={1000}
+                      sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
                       className="h-56 w-full object-cover transition duration-300 hover:scale-[1.03]"
                     />
                   ) : (
