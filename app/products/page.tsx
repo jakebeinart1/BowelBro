@@ -75,30 +75,27 @@ export default async function ProductsPage() {
             const samplePrice = price ? Number(price).toFixed(2) : null
 
             return (
-              <article key={product.id} className="card h-full w-full max-w-[320px] overflow-hidden">
-                <div className="relative overflow-hidden rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)]">
+              <article key={product.id} className="card product-card">
+                <div className="product-card-image-container product-image-container">
                   {preview ? (
                     <img
                       src={preview}
                       alt={`${product.name} – front mockup`}
                       loading="lazy"
                       decoding="async"
-                      width={800}
-                      height={1000}
-                      sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                      className="h-56 w-full object-cover transition duration-300 hover:scale-[1.03]"
+                      width={400}
+                      height={400}
+                      className="product-card-image product-image"
                     />
                   ) : (
-                    <div className="flex h-56 items-center justify-center text-sm text-[var(--text-muted)]">
-                      Preview coming soon
-                    </div>
+                    <div className="product-card-placeholder">Preview coming soon</div>
                   )}
                 </div>
-                  <div className="mt-6 flex flex-col gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-[var(--green-dark)]">{product.name}</h3>
-                      {samplePrice ? (
-                        <p className="mt-1 text-sm text-[var(--text-secondary)]">Starting at ${samplePrice}</p>
+                <div className="mt-6 flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--green-dark)]">{product.name}</h3>
+                    {samplePrice ? (
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">Starting at ${samplePrice}</p>
                       ) : null}
                     </div>
                   <div className="grid gap-2 text-sm text-[var(--text-secondary)]">

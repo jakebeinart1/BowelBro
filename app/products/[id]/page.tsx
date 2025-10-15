@@ -143,14 +143,12 @@ export default async function ProductDetail({ params }: { params: { id: string }
                           alt={`${variant.name} front mockup`}
                           loading="lazy"
                           decoding="async"
-                          width={120}
-                          height={120}
-                          className="h-12 w-12 rounded-xl object-cover"
+                          width={72}
+                          height={72}
+                          className="product-variant-image"
                         />
                       ) : (
-                        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-soft)] text-[10px] uppercase text-[var(--text-secondary)]">
-                          No Img
-                        </span>
+                        <span className="product-variant-image-placeholder">No Img</span>
                       )}
                       <span className="flex flex-1 flex-col">
                         <span className="font-semibold text-[var(--green-dark)]">{variant.name}</span>

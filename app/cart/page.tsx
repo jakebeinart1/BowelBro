@@ -113,9 +113,9 @@ export default async function CartPage() {
                   alt={`${item.variant.product.name} – ${item.variant.name}`}
                   loading="lazy"
                   decoding="async"
-                  width={160}
-                  height={160}
-                  className="h-28 w-full rounded-2xl border border-[var(--border-light)] object-cover sm:h-28 sm:w-28"
+                  width={88}
+                  height={88}
+                  className="cart-item-image product-image"
                 />
                 <div className="flex flex-1 flex-col justify-between gap-3">
                   <div>
