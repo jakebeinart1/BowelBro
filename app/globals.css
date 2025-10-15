@@ -105,21 +105,20 @@ a:hover { color: var(--green-accent); }
   display: block;
 }
 
-
 .product-card {
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
 }
 
 .product-card-image-container {
   @apply rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)];
   width: 100%;
-  max-width: 320px;
-  height: 320px;
+  max-width: 400px;
+  height: 400px;
 }
 
 .product-card-image {
-  max-width: 320px;
+  max-width: 400px;
   height: 100%;
   object-fit: cover;
   border-radius: 12px;
@@ -213,7 +212,7 @@ img[src*="/mockups/"] {
   }
 
   .product-card-image-container {
-    height: 260px;
+    height: 300px;
     max-width: 100%;
   }
 
