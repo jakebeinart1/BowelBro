@@ -61,7 +61,7 @@ export default async function ProductsPage() {
           <p>No products yet—run the admin sync to pull in your Printful catalog.</p>
         </div>
       ) : (
-        <div className="mx-auto grid w-full max-w-[1080px] gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto grid w-full max-w-[960px] justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {
             const fallbackCandidates = [
               product.thumbnailUrl,
@@ -75,7 +75,7 @@ export default async function ProductsPage() {
             const samplePrice = price ? Number(price).toFixed(2) : null
 
             return (
-              <article key={product.id} className="card h-full overflow-hidden">
+              <article key={product.id} className="card h-full w-full max-w-[320px] overflow-hidden">
                 <div className="relative overflow-hidden rounded-2xl border border-[var(--border-light)] bg-[var(--bg-soft)]">
                   {preview ? (
                     <img
