@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { retry } from '@/lib/retry'
-import { getAvailableMockupViews, getMockupPath, getPrimaryMockupImage } from '@/lib/mockup-images'
+import { buildMockupGallery, getAvailableMockupViews, getPrimaryMockupImage } from '@/lib/mockup-images'
 
 // Deeply convert BigInt -> string so JSON.stringify won't explode
 function bigIntToString(value: any): any {
@@ -42,14 +42,16 @@ export async function GET() {
         ...variant.mockups.map((mockup) => mockup.url)
       ])
     ]
+    const gallery = buildMockupGallery(product.name, fallbackSources)
+    const primary = gallery[0]?.url ?? getPrimaryMockupImage(product.name, fallbackSources)
     const views = getAvailableMockupViews(product.name)
-    const primary = getPrimaryMockupImage(product.name, fallbackSources)
 
     return {
       ...product,
       customMockups: {
-        views: views.map((view) => ({ view, url: getMockupPath(product.name, view) })),
-        primaryImage: primary
+        availableViews: views,
+        primaryImage: primary,
+        gallery
       }
     }
   })

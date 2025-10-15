@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { retry } from '@/lib/retry'
 import { addVariantToCart } from '@/lib/cart'
 import { ProductGallery } from '@/components/product-gallery'
-import { buildMockupGallery, getMockupPlaceholder, getProductImage, MOCKUP_VIEWS } from '@/lib/mockup-images'
+import { buildMockupGallery, getMockupPlaceholder, getProductImage } from '@/lib/mockup-images'
 
 export const runtime = 'nodejs'
 
@@ -56,16 +56,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
 
   const galleryEntries = buildMockupGallery(product.name, fallbackGallerySources)
 
-  const galleryImages = galleryEntries.map(({ view, url }) => {
-    const canonicalView = MOCKUP_VIEWS.find((candidate) => candidate === view) ?? null
-    const labelledView = canonicalView
-      ? canonicalView.charAt(0).toUpperCase() + canonicalView.slice(1).replace(/-/g, ' ')
-      : 'Mockup'
-    return {
-      url,
-      alt: `${product.name} – ${labelledView}`
-    }
-  })
+  const galleryImages = galleryEntries.map(({ label, url }, index) => ({
+    url,
+    alt: `${product.name} – ${label ?? `Mockup ${index + 1}`}`
+  }))
 
   if (!galleryImages.length) {
     galleryImages.push({ url: getMockupPlaceholder(), alt: `${product.name} mockup coming soon` })
