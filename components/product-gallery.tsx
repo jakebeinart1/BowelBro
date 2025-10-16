@@ -12,6 +12,8 @@ type ProductGalleryProps = {
   images: GalleryImage[]
 }
 
+const SCROLL_STEP = 102
+
 export function ProductGallery({ images }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const thumbnailTrackRef = useRef<HTMLDivElement | null>(null)
@@ -70,13 +72,24 @@ export function ProductGallery({ images }: ProductGalleryProps) {
     const itemWidth = firstItem?.getBoundingClientRect().width ?? 0
     const computedStyles = window.getComputedStyle(container)
     const gap = parseFloat(computedStyles.columnGap || computedStyles.gap || '0') || 0
-    const scrollAmount = itemWidth + gap || container.clientWidth
+    const baseWidth = itemWidth || Math.max(SCROLL_STEP - gap, 0)
+    const scrollAmount = baseWidth + gap || SCROLL_STEP
 
     container.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
       behavior: 'smooth'
     })
-  }, [])
+    window.requestAnimationFrame(() => updateScrollState())
+  }, [SCROLL_STEP, updateScrollState])
+
+  useEffect(() => {
+    const container = thumbnailTrackRef.current
+    if (!container) return
+    const activeThumb = container.querySelector<HTMLButtonElement>('.product-thumbnail.active')
+    if (!activeThumb) return
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    window.requestAnimationFrame(() => updateScrollState())
+  }, [activeIndex, updateScrollState])
 
   if (!images.length) {
     return (
@@ -141,27 +154,29 @@ export function ProductGallery({ images }: ProductGalleryProps) {
             </svg>
           </button>
 
-          <div className="product-thumbnail-track" ref={thumbnailTrackRef}>
-            {images.map((image, index) => (
-              <button
-                key={image.url + index}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                aria-label={image.alt}
-                aria-current={activeIndex === index ? 'true' : undefined}
-                className={clsx('product-thumbnail', { active: activeIndex === index })}
-              >
-                <img
-                  src={image.url}
-                  alt={image.alt}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  width={90}
-                  height={90}
-                  className="product-thumbnail-image"
-                />
-              </button>
-            ))}
+          <div className="product-thumbnail-window">
+            <div className="product-thumbnail-track" ref={thumbnailTrackRef}>
+              {images.map((image, index) => (
+                <button
+                  key={image.url + index}
+                  type="button"
+                  onClick={() => setActiveIndex(index)}
+                  aria-label={image.alt}
+                  aria-current={activeIndex === index ? 'true' : undefined}
+                  className={clsx('product-thumbnail', { active: activeIndex === index })}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.alt}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    width={90}
+                    height={90}
+                    className="product-thumbnail-image"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
 
           <button
