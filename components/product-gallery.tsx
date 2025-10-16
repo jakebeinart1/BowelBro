@@ -16,7 +16,7 @@ const SCROLL_STEP = 102
 
 export function ProductGallery({ images }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
-  const thumbnailTrackRef = useRef<HTMLDivElement | null>(null)
+  const thumbnailWindowRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const activeImage = images[activeIndex]
@@ -25,7 +25,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
   const showNext = () => setActiveIndex((idx) => (idx === images.length - 1 ? 0 : idx + 1))
 
   const updateScrollState = useCallback(() => {
-    const container = thumbnailTrackRef.current
+    const container = thumbnailWindowRef.current
     if (!container) {
       setCanScrollLeft(false)
       setCanScrollRight(false)
@@ -44,7 +44,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
   }, [activeIndex, images.length])
 
   useEffect(() => {
-    const container = thumbnailTrackRef.current
+    const container = thumbnailWindowRef.current
     if (!container) {
       setCanScrollLeft(false)
       setCanScrollRight(false)
@@ -65,15 +65,27 @@ export function ProductGallery({ images }: ProductGalleryProps) {
   }, [images.length, updateScrollState])
 
   const scrollThumbnails = useCallback((direction: 'left' | 'right') => {
-    const container = thumbnailTrackRef.current
+    const container = thumbnailWindowRef.current
     if (!container) return
 
     const firstItem = container.querySelector<HTMLElement>('.product-thumbnail')
-    const itemWidth = firstItem?.getBoundingClientRect().width ?? 0
-    const computedStyles = window.getComputedStyle(container)
-    const gap = parseFloat(computedStyles.columnGap || computedStyles.gap || '0') || 0
-    const baseWidth = itemWidth || Math.max(SCROLL_STEP - gap, 0)
-    const scrollAmount = baseWidth + gap || SCROLL_STEP
+    let itemWidth = firstItem?.getBoundingClientRect().width ?? 0
+    let gap = 0
+
+    if (firstItem) {
+      const sibling = firstItem.nextElementSibling as HTMLElement | null
+      if (sibling) {
+        const firstRect = firstItem.getBoundingClientRect()
+        const siblingRect = sibling.getBoundingClientRect()
+        gap = Math.max(siblingRect.left - firstRect.right, 0)
+      }
+    }
+
+    if (!itemWidth) {
+      itemWidth = Math.max(SCROLL_STEP - gap, 0)
+    }
+
+    const scrollAmount = (itemWidth || SCROLL_STEP) + gap
 
     container.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -83,7 +95,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
   }, [SCROLL_STEP, updateScrollState])
 
   useEffect(() => {
-    const container = thumbnailTrackRef.current
+    const container = thumbnailWindowRef.current
     if (!container) return
     const activeThumb = container.querySelector<HTMLButtonElement>('.product-thumbnail.active')
     if (!activeThumb) return
@@ -154,8 +166,8 @@ export function ProductGallery({ images }: ProductGalleryProps) {
             </svg>
           </button>
 
-          <div className="product-thumbnail-window">
-            <div className="product-thumbnail-track" ref={thumbnailTrackRef}>
+          <div className="product-thumbnail-window" ref={thumbnailWindowRef}>
+            <div className="product-thumbnail-track">
               {images.map((image, index) => (
                 <button
                   key={image.url + index}

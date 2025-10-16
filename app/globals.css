@@ -206,27 +206,26 @@ a:hover { color: var(--green-accent); }
 .product-thumbnail-window {
   width: 498px;
   max-width: 498px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
   flex-shrink: 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px;
+}
+
+.product-thumbnail-window::-webkit-scrollbar {
+  display: none;
 }
 
 .product-thumbnail-track {
   display: flex;
   align-items: center;
   gap: 12px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 4px;
-  flex: none;
-  min-width: fit-content;
-}
-
-.product-thumbnail-track::-webkit-scrollbar {
-  display: none;
+  width: max-content;
 }
 
 .product-thumbnail {
