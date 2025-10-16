@@ -91,13 +91,13 @@ export default async function ProductsPage() {
                     <div className="product-card-placeholder">Preview coming soon</div>
                   )}
                 </div>
-                <div className="mt-6 flex flex-col gap-4">
+                <div className="product-card-body">
                   <div>
                     <h3 className="text-lg font-semibold text-[var(--green-dark)]">{product.name}</h3>
                     {samplePrice ? (
                       <p className="mt-1 text-sm text-[var(--text-secondary)]">Starting at ${samplePrice}</p>
-                      ) : null}
-                    </div>
+                    ) : null}
+                  </div>
                   <div className="grid gap-2 text-sm text-[var(--text-secondary)]">
                     {product.variants.slice(0, 3).map((variant) => (
                       <div key={variant.id} className="flex items-center gap-2">

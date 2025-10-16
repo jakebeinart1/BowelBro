@@ -29,7 +29,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="product-detail-image-frame relative overflow-hidden rounded-3xl border border-[var(--border-light)] bg-[var(--bg-surface)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
+      <div className="product-detail-image-frame product-detail-main-image-container relative overflow-hidden rounded-3xl border border-[var(--border-light)] bg-[var(--bg-surface)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
         <div className="product-detail-image-container">
           <img
             src={activeImage.url}
@@ -39,7 +39,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
             fetchPriority={activeIndex === 0 ? 'high' : 'auto'}
             width={600}
             height={750}
-            className="product-detail-image"
+            className="product-detail-image product-detail-main-image"
           />
         </div>
         {images.length > 1 ? (
@@ -71,12 +71,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
               onClick={() => setActiveIndex(index)}
               aria-label={image.alt}
               aria-current={activeIndex === index ? 'true' : undefined}
-              className={clsx(
-                'product-detail-thumb-wrapper relative flex-shrink-0 overflow-hidden rounded-2xl border transition',
-                activeIndex === index
-                  ? 'border-[var(--green-accent)] shadow-[0_6px_16px_rgba(39,174,96,0.25)]'
-                  : 'border-[var(--border-light)] hover:border-[var(--green-accent)]'
-              )}
+              className={clsx('product-thumbnail', { active: activeIndex === index })}
             >
               <img
                 src={image.url}
@@ -85,7 +80,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                 decoding="async"
                 width={80}
                 height={80}
-                className="product-detail-thumb"
+                className="product-thumbnail-image"
               />
             </button>
           ))}
