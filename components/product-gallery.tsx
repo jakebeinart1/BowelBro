@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 
 export type GalleryImage = {
@@ -14,10 +14,69 @@ type ProductGalleryProps = {
 
 export function ProductGallery({ images }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const thumbnailTrackRef = useRef<HTMLDivElement | null>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
   const activeImage = images[activeIndex]
 
   const showPrev = () => setActiveIndex((idx) => (idx === 0 ? images.length - 1 : idx - 1))
   const showNext = () => setActiveIndex((idx) => (idx === images.length - 1 ? 0 : idx + 1))
+
+  const updateScrollState = useCallback(() => {
+    const container = thumbnailTrackRef.current
+    if (!container) {
+      setCanScrollLeft(false)
+      setCanScrollRight(false)
+      return
+    }
+
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    setCanScrollLeft(scrollLeft > 1)
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1)
+  }, [])
+
+  useEffect(() => {
+    if (activeIndex >= images.length) {
+      setActiveIndex(0)
+    }
+  }, [activeIndex, images.length])
+
+  useEffect(() => {
+    const container = thumbnailTrackRef.current
+    if (!container) {
+      setCanScrollLeft(false)
+      setCanScrollRight(false)
+      return
+    }
+
+    const handleScroll = () => updateScrollState()
+    const handleResize = () => updateScrollState()
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleResize)
+    updateScrollState()
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [images.length, updateScrollState])
+
+  const scrollThumbnails = useCallback((direction: 'left' | 'right') => {
+    const container = thumbnailTrackRef.current
+    if (!container) return
+
+    const firstItem = container.querySelector<HTMLElement>('.product-thumbnail')
+    const itemWidth = firstItem?.getBoundingClientRect().width ?? 0
+    const computedStyles = window.getComputedStyle(container)
+    const gap = parseFloat(computedStyles.columnGap || computedStyles.gap || '0') || 0
+    const scrollAmount = itemWidth + gap || container.clientWidth
+
+    container.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    })
+  }, [])
 
   if (!images.length) {
     return (
@@ -28,7 +87,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <div className="product-detail-image-frame product-detail-main-image-container relative overflow-hidden rounded-3xl border border-[var(--border-light)] bg-[var(--bg-surface)] shadow-[0_8px_18px_rgba(0,0,0,0.08)]">
         <div className="product-detail-image-container">
           <img
@@ -63,27 +122,65 @@ export function ProductGallery({ images }: ProductGalleryProps) {
       </div>
 
       {images.length > 1 ? (
-        <div className="flex gap-3 overflow-x-auto">
-          {images.map((image, index) => (
-            <button
-              key={image.url + index}
-              type="button"
-              onClick={() => setActiveIndex(index)}
-              aria-label={image.alt}
-              aria-current={activeIndex === index ? 'true' : undefined}
-              className={clsx('product-thumbnail', { active: activeIndex === index })}
-            >
-              <img
-                src={image.url}
-                alt={image.alt}
-                loading={index === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                width={80}
-                height={80}
-                className="product-thumbnail-image"
+        <div className="product-thumbnail-carousel">
+          <button
+            type="button"
+            className="product-carousel-arrow"
+            aria-label="Scroll thumbnails left"
+            onClick={() => scrollThumbnails('left')}
+            disabled={!canScrollLeft}
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15.5 19.5L8.5 12L15.5 4.5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-            </button>
-          ))}
+            </svg>
+          </button>
+
+          <div className="product-thumbnail-track" ref={thumbnailTrackRef}>
+            {images.map((image, index) => (
+              <button
+                key={image.url + index}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                aria-label={image.alt}
+                aria-current={activeIndex === index ? 'true' : undefined}
+                className={clsx('product-thumbnail', { active: activeIndex === index })}
+              >
+                <img
+                  src={image.url}
+                  alt={image.alt}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  width={90}
+                  height={90}
+                  className="product-thumbnail-image"
+                />
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="product-carousel-arrow"
+            aria-label="Scroll thumbnails right"
+            onClick={() => scrollThumbnails('right')}
+            disabled={!canScrollRight}
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M8.5 4.5L15.5 12L8.5 19.5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
       ) : null}
     </div>
