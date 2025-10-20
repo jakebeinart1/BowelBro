@@ -50,9 +50,39 @@ export async function syncPrintfulProducts(limit = 100) {
           const variantIdBI = toBigInt(variant.id)
           seenVariantPrintfulIds.add(variantIdBI)
           const unitPrice = parseFloat(String(variant.retail_price ?? '0'))
-          const preview = variant.files?.[0]?.preview_url
-          const mockupFiles = (variant.files ?? []).flatMap((file) => [file?.preview_url, (file as any)?.url, (file as any)?.thumbnail_url])
+          const files: any[] = Array.isArray((variant as any)?.files) ? ((variant as any)?.files ?? []) : []
+          const preview = files?.[0]?.preview_url
+          const mockupFiles = files.flatMap((file: any) => [file?.preview_url, file?.url, file?.thumbnail_url])
           const uniqueMockups = Array.from(new Set(mockupFiles.filter((url): url is string => Boolean(url))))
+
+          const catalogVariantIdRaw = (variant as any)?.variant_id ?? (variant as any)?.product?.variant_id ?? null
+          const catalogVariantIdCandidate = catalogVariantIdRaw != null ? Number(catalogVariantIdRaw) : null
+          const catalogVariantId = Number.isFinite(catalogVariantIdCandidate) ? catalogVariantIdCandidate : null
+
+          const printableFile = files.find((file: any) => {
+            const type = String(file?.type ?? '').toLowerCase()
+            return (
+              type === 'default' ||
+              type === 'front' ||
+              type === 'printfile' ||
+              type === 'mockup' ||
+              Boolean(file?.is_default)
+            )
+          }) ?? files[0]
+
+          const printableUrl = printableFile?.url ?? printableFile?.preview_url ?? printableFile?.thumbnail_url ?? null
+          const printablePlacement = printableFile?.placement ?? printableFile?.position ?? printableFile?.type ?? null
+          const printableTechnique = printableFile?.technique ?? printableFile?.method ?? null
+
+          const printableFiles = files.map((file: any) => ({
+            type: file?.type ?? null,
+            placement: file?.placement ?? file?.position ?? null,
+            technique: file?.technique ?? file?.method ?? null,
+            is_default: Boolean(file?.is_default),
+            url: file?.url ?? null,
+            preview_url: file?.preview_url ?? null,
+            thumbnail_url: file?.thumbnail_url ?? null
+          }))
 
           const variantRecord = await prisma.variant.upsert({
             where: { printfulId: variantIdBI },
@@ -61,7 +91,12 @@ export async function syncPrintfulProducts(limit = 100) {
               retailPrice: unitPrice,
               imageUrl: preview ?? undefined,
               productId: product.id,
-              isEnabled: true
+              isEnabled: true,
+              printfulCatalogVariantId: catalogVariantId ?? undefined,
+              printfulPrintFileUrl: printableUrl ?? undefined,
+              printfulPrintPlacement: printablePlacement ?? undefined,
+              printfulPrintTechnique: printableTechnique ?? undefined,
+              printfulPrintFiles: printableFiles.length ? printableFiles : undefined
             },
             create: {
               printfulId: variantIdBI,
@@ -69,7 +104,12 @@ export async function syncPrintfulProducts(limit = 100) {
               retailPrice: unitPrice,
               imageUrl: preview ?? undefined,
               productId: product.id,
-              isEnabled: true
+              isEnabled: true,
+              printfulCatalogVariantId: catalogVariantId ?? undefined,
+              printfulPrintFileUrl: printableUrl ?? undefined,
+              printfulPrintPlacement: printablePlacement ?? undefined,
+              printfulPrintTechnique: printableTechnique ?? undefined,
+              printfulPrintFiles: printableFiles.length ? printableFiles : undefined
             }
           })
 

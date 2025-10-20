@@ -47,6 +47,11 @@ model Variant {
   currency    String   @default("usd")
   imageUrl    String?
   isEnabled   Boolean  @default(true)
+  printfulCatalogVariantId Int?
+  printfulPrintFileUrl     String?
+  printfulPrintPlacement   String?
+  printfulPrintTechnique   String?
+  printfulPrintFiles       Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

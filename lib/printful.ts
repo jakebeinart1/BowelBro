@@ -154,12 +154,12 @@ export type PrintfulOrderRecipient = {
   zip?: string
 }
 
-export type PrintfulOrderItem = { sync_variant_id: number; quantity: number }
+export type PrintfulSyncOrderItem = { sync_variant_id: number; quantity: number }
 
 export type CreatePrintfulOrderPayload = {
   external_id: string
   recipient: PrintfulOrderRecipient
-  items: PrintfulOrderItem[]
+  items: PrintfulSyncOrderItem[]
   confirm?: boolean
 }
 
@@ -192,4 +192,180 @@ export async function getPrintfulOrderByExternalId(externalId: string): Promise<
     if (axiosError.response?.status === 404) return null
     throw error
   }
+}
+
+export type ManualOrderPlacementLayer = {
+  type: 'file'
+  url: string
+}
+
+export type ManualOrderPlacement = {
+  placement: string
+  technique?: string | null
+  layers: ManualOrderPlacementLayer[]
+}
+
+export type ManualOrderItem = {
+  source: 'catalog'
+  catalog_variant_id: number
+  quantity: number
+  placements: ManualOrderPlacement[]
+}
+
+export type CreateManualOrderPayload = {
+  external_id: string
+  recipient: PrintfulOrderRecipient & { country_code: string; city: string; zip: string; address1: string }
+  items: ManualOrderItem[]
+  shipping?: string
+}
+
+export type ManualOrderCosts = {
+  currency?: string
+  subtotal?: number
+  discount?: number
+  shipping?: number
+  digitization?: number
+  tax?: number
+  vat?: number
+  total?: number
+  calculation_status?: 'pending' | 'calculating' | 'done' | 'failed'
+}
+
+export type ManualOrder = {
+  id: number
+  external_id?: string
+  status?: string
+  shipping?: { service?: string } | null
+  costs?: ManualOrderCosts | null
+  items?: Array<{
+    id?: number
+    name?: string
+    quantity?: number
+  }>
+}
+
+function normalizeCalculationStatus(value: any): ManualOrderCosts['calculation_status'] {
+  const raw = String(value ?? '').toLowerCase()
+  if (raw === 'done') return 'done'
+  if (raw === 'failed') return 'failed'
+  if (raw === 'calculating') return 'calculating'
+  return 'pending'
+}
+
+function handleOrderLookupError(error: unknown): ManualOrder | null {
+  const axiosError = error as AxiosError
+  if (axiosError?.response?.status === 404) return null
+  throw error
+}
+
+export async function createManualStoreOrder(payload: CreateManualOrderPayload): Promise<ManualOrder | null> {
+  const res = await requestWithRetry(() => printful.post('/v2/orders', payload))
+  const order = res.data?.result as ManualOrder | undefined
+  if (order?.costs) {
+    order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
+  }
+  return order ?? null
+}
+
+export async function getManualStoreOrder(id: number): Promise<ManualOrder | null> {
+  try {
+    const res = await requestWithRetry(() => printful.get(`/v2/orders/${id}`))
+    const order = res.data?.result as ManualOrder | undefined
+    if (order?.costs) {
+      order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
+    }
+    return order ?? null
+  } catch (error) {
+    return handleOrderLookupError(error)
+  }
+}
+
+export async function getManualStoreOrderByExternalId(externalId: string): Promise<ManualOrder | null> {
+  if (!externalId) return null
+  try {
+    const res = await requestWithRetry(() => printful.get(`/v2/orders/@${encodeURIComponent(externalId)}`))
+    const order = res.data?.result as ManualOrder | undefined
+    if (order?.costs) {
+      order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
+    }
+    return order ?? null
+  } catch (error) {
+    return handleOrderLookupError(error)
+  }
+}
+
+export async function confirmManualStoreOrder(orderId: number): Promise<ManualOrder | null> {
+  try {
+    const res = await requestWithRetry(() => printful.post(`/v2/orders/${orderId}/confirm`, {}))
+    const order = res.data?.result as ManualOrder | undefined
+    if (order?.costs) {
+      order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
+    }
+    return order ?? null
+  } catch (error) {
+    const axiosError = error as AxiosError
+    if (axiosError?.response?.status === 409) {
+      return getManualStoreOrder(orderId)
+    }
+    throw error
+  }
+}
+
+export async function waitForManualOrderCosts(orderId: number, { pollIntervalMs = 2000, timeoutMs = 5 * 60 * 1000 } = {}): Promise<ManualOrder | null> {
+  const startedAt = Date.now()
+  let attempt = 0
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const order = await getManualStoreOrder(orderId)
+    if (!order) return null
+
+    const status = normalizeCalculationStatus(order.costs?.calculation_status)
+    if (status === 'done') return order
+    if (status === 'failed') {
+      throw new Error(`Printful cost calculation failed for order ${orderId}`)
+    }
+
+    const nextDelay = Math.min(pollIntervalMs * Math.max(1, attempt + 1), 8000)
+    await delay(nextDelay)
+    attempt += 1
+  }
+
+  throw new Error(`Timed out waiting for Printful cost calculation for order ${orderId}`)
+}
+
+export async function submitManualStoreOrder(
+  payload: CreateManualOrderPayload,
+  options?: { pollIntervalMs?: number; timeoutMs?: number }
+): Promise<ManualOrder | null> {
+  let order: ManualOrder | null = null
+
+  try {
+    order = await createManualStoreOrder(payload)
+  } catch (error) {
+    const axiosError = error as AxiosError
+    if (axiosError?.response?.status === 409 || axiosError?.response?.status === 400) {
+      order = await getManualStoreOrderByExternalId(payload.external_id)
+    } else {
+      throw error
+    }
+  }
+
+  if (!order) {
+    order = await getManualStoreOrderByExternalId(payload.external_id)
+    if (!order) {
+      throw new Error('Printful order creation failed and could not be retrieved by external_id')
+    }
+  }
+
+  const costStatus = normalizeCalculationStatus(order.costs?.calculation_status)
+  if (costStatus !== 'done') {
+    order = await waitForManualOrderCosts(order.id, options)
+  }
+
+  if (!order) {
+    throw new Error('Printful order retrieval failed during cost polling')
+  }
+
+  const confirmed = await confirmManualStoreOrder(order.id)
+  return confirmed ?? order
 }

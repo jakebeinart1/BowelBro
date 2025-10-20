@@ -4,10 +4,11 @@ import { AxiosError } from 'axios'
 import { Prisma, type OrderStatus } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import {
-  CreatePrintfulOrderPayload,
-  PrintfulOrder,
-  createPrintfulOrder,
-  getPrintfulOrderByExternalId
+  CreateManualOrderPayload,
+  ManualOrder,
+  ManualOrderPlacement,
+  submitManualStoreOrder,
+  getManualStoreOrderByExternalId
 } from '@/lib/printful'
 import { retry } from '@/lib/retry'
 
@@ -22,8 +23,9 @@ function mapPrintfulStatus(status?: string | null): OrderStatus {
 
   if (!normalized) return 'FULFILLING'
   if (normalized.includes('cancel') || normalized.includes('fail')) return 'CANCELLED'
-  if (normalized.includes('ship') || normalized.includes('fulfill')) return 'SHIPPED'
-  if (normalized.includes('draft')) return 'PAID'
+  if (normalized.includes('ship') || normalized.includes('in_transit')) return 'SHIPPED'
+  if (normalized.includes('queue') || normalized.includes('production') || normalized.includes('fulfill')) return 'FULFILLING'
+  if (normalized.includes('draft') || normalized.includes('pending')) return 'PAID'
 
   return 'FULFILLING'
 }
@@ -92,12 +94,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true })
       }
 
-      const cart = await retry(
-        () =>
-          prisma.cart.findUnique({
-            where: { id: cartId },
-            include: { items: { include: { variant: true } } }
-          }),
+    const cart = await retry(
+      () =>
+        prisma.cart.findUnique({
+          where: { id: cartId },
+          include: { items: { include: { variant: { include: { mockups: true } } } } }
+        }),
         3,
         400
       )
@@ -132,12 +134,67 @@ export async function POST(req: NextRequest) {
       })
 
       try {
-        const items: CreatePrintfulOrderPayload['items'] = cart.items.map((it) => ({
-          sync_variant_id: Number(String(it.variant.printfulId)),
-          quantity: it.quantity
-        }))
+        const items: CreateManualOrderPayload['items'] = cart.items.map((it) => {
+          const variant = it.variant
+          const catalogVariantId = Number(variant.printfulCatalogVariantId ?? undefined)
+          const syncVariantId = Number(variant.printfulId ?? undefined)
 
-        const payload: CreatePrintfulOrderPayload = {
+          const resolvedCatalogId = Number.isFinite(catalogVariantId) && catalogVariantId > 0 ? catalogVariantId : Number.isFinite(syncVariantId) ? syncVariantId : null
+
+          if (!resolvedCatalogId) {
+            throw new Error(`Missing Printful catalog variant id for variant ${variant.id}`)
+          }
+
+          const rawFiles = Array.isArray(variant.printfulPrintFiles) ? (variant.printfulPrintFiles as any[]) : []
+          const placementGroups = new Map<string, ManualOrderPlacement>()
+
+          for (const file of rawFiles) {
+            const fileUrl = file?.url ?? file?.preview_url ?? file?.thumbnail_url
+            if (!fileUrl || typeof fileUrl !== 'string') continue
+
+            const placementKey = String(file?.placement ?? file?.type ?? variant.printfulPrintPlacement ?? 'front').toLowerCase() || 'front'
+            const technique = typeof file?.technique === 'string' ? file.technique : variant.printfulPrintTechnique ?? 'dtg'
+
+            const existing = placementGroups.get(placementKey)
+            if (existing) {
+              const existingUrls = new Set(existing.layers.map((layer) => layer.url))
+              if (!existingUrls.has(fileUrl)) {
+                existing.layers.push({ type: 'file', url: fileUrl })
+              }
+              continue
+            }
+
+            placementGroups.set(placementKey, {
+              placement: placementKey,
+              technique,
+              layers: [{ type: 'file', url: fileUrl }]
+            })
+          }
+
+          if (!placementGroups.size) {
+            const fallbackUrl = variant.printfulPrintFileUrl ?? variant.imageUrl ?? variant.mockups?.[0]?.url
+            if (!fallbackUrl) {
+              throw new Error(`Missing Printful print file for variant ${variant.id}`)
+            }
+
+            placementGroups.set('front', {
+              placement: variant.printfulPrintPlacement ?? 'front',
+              technique: variant.printfulPrintTechnique ?? 'dtg',
+              layers: [{ type: 'file', url: fallbackUrl }]
+            })
+          }
+
+          const placements = Array.from(placementGroups.values())
+
+          return {
+            source: 'catalog' as const,
+            catalog_variant_id: resolvedCatalogId,
+            quantity: it.quantity,
+            placements
+          }
+        })
+
+        const manualPayload: CreateManualOrderPayload = {
           external_id: order.id,
           recipient: {
             name,
@@ -151,24 +208,30 @@ export async function POST(req: NextRequest) {
             zip: shippingAddress.postal_code!
           },
           items,
-          confirm: true
+          shipping: 'STANDARD'
         }
 
-        const printfulOrder = await createPrintfulOrder(payload)
+        const printfulOrder = await submitManualStoreOrder(manualPayload)
 
-        await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            status: mapPrintfulStatus(printfulOrder?.status),
-            printfulId: printfulOrder?.id ?? undefined
-          }
-        })
+        if (printfulOrder) {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              status: mapPrintfulStatus(printfulOrder.status),
+              printfulId: printfulOrder.id ?? undefined
+            }
+          })
+        } else {
+          console.warn('Printful manual order submission returned no order payload', {
+            externalId: order.id
+          })
+        }
       } catch (error) {
-        const axiosError = error as AxiosError<{ result?: PrintfulOrder | null }>
+        const axiosError = error as AxiosError<{ result?: ManualOrder | null }>
         let handled = false
 
         if (axiosError?.response?.status === 409 || axiosError?.response?.status === 400) {
-          const existing = await getPrintfulOrderByExternalId(order.id).catch(() => null)
+          const existing = await getManualStoreOrderByExternalId(order.id).catch(() => null)
 
           if (existing) {
             await prisma.order.update({
@@ -184,11 +247,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!handled) {
-          console.error('Printful order creation failed:', axiosError?.response?.data ?? error)
-
-          if (!(axiosError?.isAxiosError ?? false)) {
-            throw error
-          }
+          console.error('Printful manual order submission failed:', axiosError?.response?.data ?? error)
         }
       }
 
