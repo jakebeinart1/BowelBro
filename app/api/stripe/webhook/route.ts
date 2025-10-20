@@ -18,6 +18,10 @@ type PlacementGroup = {
   layers: Array<{ url: string }>
 }
 
+function jsonField(value: Prisma.InputJsonValue | null): Prisma.InputJsonValue | Prisma.JsonNull {
+  return value === null ? Prisma.JsonNull : value
+}
+
 function mapPrintfulStatus(status?: string | null): OrderStatus {
   const normalized = String(status ?? '').toLowerCase()
 
@@ -247,7 +251,7 @@ export async function POST(req: NextRequest) {
             data: {
               status: mapPrintfulStatus(printfulOrder.status),
               printfulId: printfulOrder.id ?? undefined,
-              printfulResponse: responseForStorage,
+              printfulResponse: jsonField(responseForStorage),
               printfulSyncedAt: now,
               printfulError: null
             }
@@ -273,7 +277,7 @@ export async function POST(req: NextRequest) {
               data: {
                 status: mapPrintfulStatus(existing.status),
                 printfulId: existing.id ?? undefined,
-                printfulResponse: responseForStorage,
+                printfulResponse: jsonField(responseForStorage),
                 printfulSyncedAt: now,
                 printfulError: null
               }
@@ -291,7 +295,7 @@ export async function POST(req: NextRequest) {
           await prisma.order.update({
             where: { id: order.id },
             data: {
-              printfulResponse: responseForStorage,
+              printfulResponse: jsonField(responseForStorage),
               printfulError: errorMessage,
               printfulSyncedAt: new Date()
             }
