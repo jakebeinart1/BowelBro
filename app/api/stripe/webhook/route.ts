@@ -3,7 +3,13 @@ import Stripe from 'stripe'
 import { AxiosError } from 'axios'
 import { Prisma, type OrderStatus } from '@prisma/client'
 import { prisma } from '@/lib/db'
-import { CreateManualOrderPayload, ManualOrder, submitManualStoreOrder, getManualStoreOrderByExternalId } from '@/lib/printful'
+import {
+  CreateManualOrderPayload,
+  ManualOrder,
+  ManualOrderPlacement,
+  submitManualStoreOrder,
+  getManualStoreOrderByExternalId
+} from '@/lib/printful'
 import { retry } from '@/lib/retry'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
@@ -12,11 +18,7 @@ export const runtime = 'nodejs'
 
 type StripeCheckoutSession = Stripe.Checkout.Session
 
-type PlacementGroup = {
-  placement: string
-  technique?: string | null
-  layers: Array<{ url: string }>
-}
+type PlacementGroup = ManualOrderPlacement
 
 function jsonField(value: Prisma.InputJsonValue | null): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
   return value === null ? Prisma.JsonNull : value
@@ -166,7 +168,7 @@ export async function POST(req: NextRequest) {
             if (existing) {
               const existingUrls = new Set(existing.layers.map((layer) => layer.url))
               if (!existingUrls.has(fileUrl)) {
-                existing.layers.push({ url: fileUrl })
+                existing.layers.push({ type: 'file', url: fileUrl })
               }
               continue
             }
@@ -174,7 +176,7 @@ export async function POST(req: NextRequest) {
             placementGroups.set(placementKey, {
               placement: placementKey,
               technique,
-              layers: [{ url: fileUrl }]
+              layers: [{ type: 'file', url: fileUrl }]
             })
           }
 
@@ -187,7 +189,7 @@ export async function POST(req: NextRequest) {
             placementGroups.set('front', {
               placement: variant.printfulPrintPlacement ?? 'front',
               technique: variant.printfulPrintTechnique ?? 'dtg',
-              layers: [{ url: fallbackUrl }]
+              layers: [{ type: 'file', url: fallbackUrl }]
             })
           }
 
@@ -209,6 +211,7 @@ export async function POST(req: NextRequest) {
             source: 'catalog' as const,
             catalog_variant_id: Math.trunc(catalogVariantId),
             quantity: it.quantity,
+            placements,
             files
           }
         })
