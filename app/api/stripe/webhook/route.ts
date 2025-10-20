@@ -18,7 +18,7 @@ type PlacementGroup = {
   layers: Array<{ url: string }>
 }
 
-function jsonField(value: Prisma.InputJsonValue | null): Prisma.InputJsonValue | Prisma.JsonNull {
+function jsonField(value: Prisma.InputJsonValue | null): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
   return value === null ? Prisma.JsonNull : value
 }
 
