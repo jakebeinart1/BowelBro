@@ -194,22 +194,17 @@ export async function getPrintfulOrderByExternalId(externalId: string): Promise<
   }
 }
 
-export type ManualOrderPlacementLayer = {
-  type: 'file'
+export type ManualOrderFile = {
+  type?: string | null
+  placement?: string | null
   url: string
 }
 
-export type ManualOrderPlacement = {
-  placement: string
-  technique?: string | null
-  layers: ManualOrderPlacementLayer[]
-}
-
 export type ManualOrderItem = {
-  source: 'catalog'
-  catalog_variant_id: number
+  source?: 'catalog'
+  catalog_variant_id?: number
   quantity: number
-  placements: ManualOrderPlacement[]
+  files: ManualOrderFile[]
 }
 
 export type CreateManualOrderPayload = {

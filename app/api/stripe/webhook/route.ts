@@ -3,13 +3,7 @@ import Stripe from 'stripe'
 import { AxiosError } from 'axios'
 import { Prisma, type OrderStatus } from '@prisma/client'
 import { prisma } from '@/lib/db'
-import {
-  CreateManualOrderPayload,
-  ManualOrder,
-  ManualOrderPlacement,
-  submitManualStoreOrder,
-  getManualStoreOrderByExternalId
-} from '@/lib/printful'
+import { CreateManualOrderPayload, ManualOrder, submitManualStoreOrder, getManualStoreOrderByExternalId } from '@/lib/printful'
 import { retry } from '@/lib/retry'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
@@ -17,6 +11,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06
 export const runtime = 'nodejs'
 
 type StripeCheckoutSession = Stripe.Checkout.Session
+
+type PlacementGroup = {
+  placement: string
+  technique?: string | null
+  layers: Array<{ url: string }>
+}
 
 function mapPrintfulStatus(status?: string | null): OrderStatus {
   const normalized = String(status ?? '').toLowerCase()
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
           }
 
           const rawFiles = Array.isArray(variant.printfulPrintFiles) ? (variant.printfulPrintFiles as any[]) : []
-          const placementGroups = new Map<string, ManualOrderPlacement>()
+          const placementGroups = new Map<string, PlacementGroup>()
 
           for (const file of rawFiles) {
             const fileUrl = file?.url ?? file?.preview_url ?? file?.thumbnail_url
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
             if (existing) {
               const existingUrls = new Set(existing.layers.map((layer) => layer.url))
               if (!existingUrls.has(fileUrl)) {
-                existing.layers.push({ type: 'file', url: fileUrl })
+                existing.layers.push({ url: fileUrl })
               }
               continue
             }
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
             placementGroups.set(placementKey, {
               placement: placementKey,
               technique,
-              layers: [{ type: 'file', url: fileUrl }]
+              layers: [{ url: fileUrl }]
             })
           }
 
@@ -183,17 +183,29 @@ export async function POST(req: NextRequest) {
             placementGroups.set('front', {
               placement: variant.printfulPrintPlacement ?? 'front',
               technique: variant.printfulPrintTechnique ?? 'dtg',
-              layers: [{ type: 'file', url: fallbackUrl }]
+              layers: [{ url: fallbackUrl }]
             })
           }
 
           const placements = Array.from(placementGroups.values())
 
+          const files = placements.flatMap((placement) =>
+            placement.layers.map((layer, index) => ({
+              type: index === 0 ? 'default' : 'additional',
+              placement: placement.placement,
+              url: layer.url
+            }))
+          )
+
+          if (!files.length) {
+            throw new Error(`Missing Printful print files for variant ${variant.id}`)
+          }
+
           return {
             source: 'catalog' as const,
             catalog_variant_id: Math.trunc(catalogVariantId),
             quantity: it.quantity,
-            placements
+            files
           }
         })
 
@@ -214,14 +226,30 @@ export async function POST(req: NextRequest) {
           shipping: 'STANDARD'
         }
 
+        const payloadForStorage = JSON.parse(JSON.stringify(manualPayload)) as Prisma.InputJsonValue
+
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            printfulPayload: payloadForStorage,
+            printfulError: null
+          }
+        })
+
         const printfulOrder = await submitManualStoreOrder(manualPayload)
 
         if (printfulOrder) {
+          const responseForStorage = JSON.parse(JSON.stringify(printfulOrder)) as Prisma.InputJsonValue
+          const now = new Date()
+
           await prisma.order.update({
             where: { id: order.id },
             data: {
               status: mapPrintfulStatus(printfulOrder.status),
-              printfulId: printfulOrder.id ?? undefined
+              printfulId: printfulOrder.id ?? undefined,
+              printfulResponse: responseForStorage,
+              printfulSyncedAt: now,
+              printfulError: null
             }
           })
         } else {
@@ -237,11 +265,17 @@ export async function POST(req: NextRequest) {
           const existing = await getManualStoreOrderByExternalId(order.id).catch(() => null)
 
           if (existing) {
+            const responseForStorage = JSON.parse(JSON.stringify(existing)) as Prisma.InputJsonValue
+            const now = new Date()
+
             await prisma.order.update({
               where: { id: order.id },
               data: {
                 status: mapPrintfulStatus(existing.status),
-                printfulId: existing.id ?? undefined
+                printfulId: existing.id ?? undefined,
+                printfulResponse: responseForStorage,
+                printfulSyncedAt: now,
+                printfulError: null
               }
             })
 
@@ -250,7 +284,20 @@ export async function POST(req: NextRequest) {
         }
 
         if (!handled) {
-          console.error('Printful manual order submission failed:', axiosError?.response?.data ?? error)
+          const responseData = axiosError?.response?.data ?? null
+          const responseForStorage = responseData ? (JSON.parse(JSON.stringify(responseData)) as Prisma.InputJsonValue) : null
+          const errorMessage = axiosError?.message ?? (typeof error === 'string' ? error : 'Unknown Printful error')
+
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              printfulResponse: responseForStorage,
+              printfulError: errorMessage,
+              printfulSyncedAt: new Date()
+            }
+          }).catch(() => {})
+
+          console.error('Printful manual order submission failed:', responseData ?? error)
           throw error
         }
       }
