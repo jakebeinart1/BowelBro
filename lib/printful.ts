@@ -343,17 +343,26 @@ export async function submitManualStoreOrder(
     order = await createManualStoreOrder(payload)
   } catch (error) {
     const axiosError = error as AxiosError
-    if (axiosError?.response?.status === 409 || axiosError?.response?.status === 400) {
+    const status = axiosError?.response?.status
+
+    if (status === 409) {
       order = await getManualStoreOrderByExternalId(payload.external_id)
+      if (!order) {
+        const apiMessage = (axiosError?.response?.data as any)?.error?.message ?? axiosError?.message
+        throw new Error(`Printful reported a duplicate order but none was found for external_id=${payload.external_id}: ${apiMessage}`)
+      }
     } else {
-      throw error
+      const apiMessage = (axiosError?.response?.data as any)?.error?.message ?? axiosError?.message
+      const validationDetails = (axiosError?.response?.data as any)?.error ?? axiosError?.response?.data
+      const validationJson = validationDetails ? JSON.stringify(validationDetails) : apiMessage
+      throw new Error(`Printful order creation failed (${status ?? 'unknown status'}): ${validationJson}`)
     }
   }
 
   if (!order) {
     order = await getManualStoreOrderByExternalId(payload.external_id)
     if (!order) {
-      throw new Error('Printful order creation failed and could not be retrieved by external_id')
+      throw new Error(`Printful order creation failed and could not be retrieved by external_id=${payload.external_id}`)
     }
   }
 
