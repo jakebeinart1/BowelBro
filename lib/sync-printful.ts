@@ -57,7 +57,10 @@ export async function syncPrintfulProducts(limit = 100) {
 
           const catalogVariantIdRaw = (variant as any)?.variant_id ?? (variant as any)?.product?.variant_id ?? null
           const catalogVariantIdCandidate = catalogVariantIdRaw != null ? Number(catalogVariantIdRaw) : null
-          const catalogVariantId = Number.isFinite(catalogVariantIdCandidate) && catalogVariantIdCandidate > 0 ? catalogVariantIdCandidate : null
+          const catalogVariantId =
+            typeof catalogVariantIdCandidate === 'number' && Number.isFinite(catalogVariantIdCandidate) && catalogVariantIdCandidate > 0
+              ? catalogVariantIdCandidate
+              : null
 
           const printableFile = files.find((file: any) => {
             const type = String(file?.type ?? '').toLowerCase()
