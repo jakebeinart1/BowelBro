@@ -136,13 +136,16 @@ export async function POST(req: NextRequest) {
       try {
         const items: CreateManualOrderPayload['items'] = cart.items.map((it) => {
           const variant = it.variant
-          const catalogVariantId = Number(variant.printfulCatalogVariantId ?? undefined)
-          const syncVariantId = Number(variant.printfulId ?? undefined)
+          const catalogVariantIdRaw = variant.printfulCatalogVariantId
+          const catalogVariantId =
+            typeof catalogVariantIdRaw === 'bigint'
+              ? Number(catalogVariantIdRaw)
+              : catalogVariantIdRaw != null
+                ? Number(catalogVariantIdRaw)
+                : null
 
-          const resolvedCatalogId = Number.isFinite(catalogVariantId) && catalogVariantId > 0 ? catalogVariantId : Number.isFinite(syncVariantId) ? syncVariantId : null
-
-          if (!resolvedCatalogId) {
-            throw new Error(`Missing Printful catalog variant id for variant ${variant.id}`)
+          if (!Number.isFinite(catalogVariantId) || !catalogVariantId || catalogVariantId <= 0) {
+            throw new Error(`Missing Printful catalog variant id for variant ${variant.id}; re-run sync to refresh catalog mappings.`)
           }
 
           const rawFiles = Array.isArray(variant.printfulPrintFiles) ? (variant.printfulPrintFiles as any[]) : []
@@ -188,7 +191,7 @@ export async function POST(req: NextRequest) {
 
           return {
             source: 'catalog' as const,
-            catalog_variant_id: resolvedCatalogId,
+            catalog_variant_id: Math.trunc(catalogVariantId),
             quantity: it.quantity,
             placements
           }
@@ -248,6 +251,7 @@ export async function POST(req: NextRequest) {
 
         if (!handled) {
           console.error('Printful manual order submission failed:', axiosError?.response?.data ?? error)
+          throw error
         }
       }
 

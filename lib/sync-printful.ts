@@ -57,7 +57,7 @@ export async function syncPrintfulProducts(limit = 100) {
 
           const catalogVariantIdRaw = (variant as any)?.variant_id ?? (variant as any)?.product?.variant_id ?? null
           const catalogVariantIdCandidate = catalogVariantIdRaw != null ? Number(catalogVariantIdRaw) : null
-          const catalogVariantId = Number.isFinite(catalogVariantIdCandidate) ? catalogVariantIdCandidate : null
+          const catalogVariantId = Number.isFinite(catalogVariantIdCandidate) && catalogVariantIdCandidate > 0 ? catalogVariantIdCandidate : null
 
           const printableFile = files.find((file: any) => {
             const type = String(file?.type ?? '').toLowerCase()
@@ -92,7 +92,7 @@ export async function syncPrintfulProducts(limit = 100) {
               imageUrl: preview ?? undefined,
               productId: product.id,
               isEnabled: true,
-              printfulCatalogVariantId: catalogVariantId ?? undefined,
+              printfulCatalogVariantId: catalogVariantId != null ? BigInt(Math.trunc(catalogVariantId)) : undefined,
               printfulPrintFileUrl: printableUrl ?? undefined,
               printfulPrintPlacement: printablePlacement ?? undefined,
               printfulPrintTechnique: printableTechnique ?? undefined,
@@ -105,7 +105,7 @@ export async function syncPrintfulProducts(limit = 100) {
               imageUrl: preview ?? undefined,
               productId: product.id,
               isEnabled: true,
-              printfulCatalogVariantId: catalogVariantId ?? undefined,
+              printfulCatalogVariantId: catalogVariantId != null ? BigInt(Math.trunc(catalogVariantId)) : undefined,
               printfulPrintFileUrl: printableUrl ?? undefined,
               printfulPrintPlacement: printablePlacement ?? undefined,
               printfulPrintTechnique: printableTechnique ?? undefined,

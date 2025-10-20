@@ -47,7 +47,7 @@ model Variant {
   currency    String   @default("usd")
   imageUrl    String?
   isEnabled   Boolean  @default(true)
-  printfulCatalogVariantId Int?
+  printfulCatalogVariantId BigInt?
   printfulPrintFileUrl     String?
   printfulPrintPlacement   String?
   printfulPrintTechnique   String?
