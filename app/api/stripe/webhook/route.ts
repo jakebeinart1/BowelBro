@@ -1,37 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import axios from 'axios'
+import { AxiosError } from 'axios'
+import type { OrderStatus } from '@prisma/client'
 import { prisma } from '@/lib/db'
+import {
+  CreatePrintfulOrderPayload,
+  PrintfulOrder,
+  createPrintfulOrder,
+  getPrintfulOrderByExternalId
+} from '@/lib/printful'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
-
-const printful = axios.create({
-  baseURL: 'https://api.printful.com',
-  headers: { Authorization: `Bearer ${process.env.PRINTFUL_API_KEY}` }
-})
 
 export const runtime = 'nodejs'
 
 type StripeCheckoutSession = Stripe.Checkout.Session
 
-type PrintfulOrderRequest = {
-  external_id: string
-  recipient: {
-    name?: string
-    email?: string
-    phone?: string
-    address1?: string
-    address2?: string
-    city?: string
-    state_code?: string
-    country_code?: string
-    zip?: string
-  }
-  items: Array<{
-    sync_variant_id: number
-    quantity: number
-  }>
-  confirm: boolean
+function mapPrintfulStatus(status?: string | null): OrderStatus {
+  const normalized = String(status ?? '').toLowerCase()
+
+  if (!normalized) return 'FULFILLING'
+  if (normalized.includes('cancel') || normalized.includes('fail')) return 'CANCELLED'
+  if (normalized.includes('ship') || normalized.includes('fulfill')) return 'SHIPPED'
+  if (normalized.includes('draft')) return 'PAID'
+
+  return 'FULFILLING'
 }
 
 export async function POST(req: NextRequest) {
@@ -120,12 +113,12 @@ export async function POST(req: NextRequest) {
     })
 
     try {
-      const items: PrintfulOrderRequest['items'] = cart.items.map((it) => ({
+      const items: CreatePrintfulOrderPayload['items'] = cart.items.map((it) => ({
         sync_variant_id: Number(String(it.variant.printfulId)),
         quantity: it.quantity
       }))
 
-      const payload: PrintfulOrderRequest = {
+      const payload: CreatePrintfulOrderPayload = {
         external_id: order.id,
         recipient: {
           name,
@@ -142,14 +135,38 @@ export async function POST(req: NextRequest) {
         confirm: true
       }
 
-      await printful.post('/orders', payload)
+      const printfulOrder = await createPrintfulOrder(payload)
 
       await prisma.order.update({
         where: { id: order.id },
-        data: { status: 'FULFILLING' }
+        data: {
+          status: mapPrintfulStatus(printfulOrder?.status),
+          printfulId: printfulOrder?.id ?? undefined
+        }
       })
     } catch (error) {
-      console.error('Printful order creation failed:', error)
+      const axiosError = error as AxiosError<{ result?: PrintfulOrder | null }>
+      let handled = false
+
+      if (axiosError?.response?.status === 409 || axiosError?.response?.status === 400) {
+        const existing = await getPrintfulOrderByExternalId(order.id).catch(() => null)
+
+        if (existing) {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              status: mapPrintfulStatus(existing.status),
+              printfulId: existing.id ?? undefined
+            }
+          })
+
+          handled = true
+        }
+      }
+
+      if (!handled) {
+        console.error('Printful order creation failed:', axiosError?.response?.data ?? error)
+      }
     }
 
     await prisma.cart.delete({ where: { id: cart.id } }).catch(() => {})

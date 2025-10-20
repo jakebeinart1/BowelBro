@@ -142,22 +142,54 @@ export async function getSyncProduct(productId: number) {
   }
 }
 
-export async function createPrintfulOrder(payload: {
+export type PrintfulOrderRecipient = {
+  name?: string
+  email?: string
+  phone?: string
+  address1?: string
+  address2?: string
+  city?: string
+  state_code?: string
+  country_code?: string
+  zip?: string
+}
+
+export type PrintfulOrderItem = { sync_variant_id: number; quantity: number }
+
+export type CreatePrintfulOrderPayload = {
   external_id: string
-  recipient: {
-    name?: string
-    email?: string
-    phone?: string
-    address1?: string
-    address2?: string
-    city?: string
-    state_code?: string
-    country_code?: string
-    zip?: string
-  }
-  items: Array<{ sync_variant_id: number; quantity: number }>
+  recipient: PrintfulOrderRecipient
+  items: PrintfulOrderItem[]
   confirm?: boolean
-}) {
-  const res = await printful.post('/orders', payload)
-  return res.data
+}
+
+export type PrintfulOrder = {
+  id: number
+  external_id?: string
+  status?: string
+  created?: number
+  updated?: number
+}
+
+export async function createPrintfulOrder(payload: CreatePrintfulOrderPayload): Promise<PrintfulOrder | null> {
+  const body: CreatePrintfulOrderPayload = {
+    ...payload,
+    confirm: payload.confirm ?? true
+  }
+
+  const res = await requestWithRetry(() => printful.post('/orders', body))
+  return (res.data?.result as PrintfulOrder | undefined) ?? null
+}
+
+export async function getPrintfulOrderByExternalId(externalId: string): Promise<PrintfulOrder | null> {
+  if (!externalId) return null
+
+  try {
+    const res = await requestWithRetry(() => printful.get(`/orders/@${encodeURIComponent(externalId)}`))
+    return (res.data?.result as PrintfulOrder | undefined) ?? null
+  } catch (error) {
+    const axiosError = error as AxiosError
+    if (axiosError.response?.status === 404) return null
+    throw error
+  }
 }
