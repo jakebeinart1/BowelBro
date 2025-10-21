@@ -9,7 +9,8 @@
     "postinstall": "prisma migrate deploy && prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "sync:printful": "tsx scripts/sync_printful.ts"
+    "sync:printful": "tsx scripts/sync_printful.ts",
+    "report:donations": "tsx scripts/export_donations.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",
