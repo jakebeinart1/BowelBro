@@ -265,23 +265,55 @@ function handleOrderLookupError(error: unknown): ManualOrder | null {
   throw error
 }
 
-export async function createManualStoreOrder(payload: CreateManualOrderPayload): Promise<ManualOrder | null> {
-  const res = await requestWithRetry(() => printful.post('/v2/orders', payload))
-  const order = res.data?.result as ManualOrder | undefined
+function extractManualOrder(
+  data: any,
+  context: string,
+  options: { allowMissing?: boolean } = {}
+): ManualOrder | null {
+  if (!data) return null
+
+  const { allowMissing = false } = options
+
+  const code = typeof data?.code === 'number' ? data.code : typeof data?.status === 'number' ? data.status : null
+  const errorPayload = data?.error ?? null
+
+  if (errorPayload) {
+    const message =
+      typeof errorPayload === 'string'
+        ? errorPayload
+        : typeof errorPayload?.message === 'string'
+          ? errorPayload.message
+          : JSON.stringify(errorPayload)
+    throw new Error(`Printful ${context} failed (${code ?? 'unknown code'}): ${message}`)
+  }
+
+  if (code && code >= 400) {
+    throw new Error(`Printful ${context} failed (${code})`)
+  }
+
+  const rawResult = data?.result ?? data?.data ?? null
+  const orderData = rawResult?.order ?? rawResult
+  if (!orderData) {
+    if (allowMissing) return null
+    throw new Error(`Printful ${context} returned no order payload`)
+  }
+
+  const order = orderData as ManualOrder
   if (order?.costs) {
     order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
   }
-  return order ?? null
+  return order
+}
+
+export async function createManualStoreOrder(payload: CreateManualOrderPayload): Promise<ManualOrder | null> {
+  const res = await requestWithRetry(() => printful.post('/v2/orders', payload))
+  return extractManualOrder(res.data, 'order creation', { allowMissing: false })
 }
 
 export async function getManualStoreOrder(id: number): Promise<ManualOrder | null> {
   try {
     const res = await requestWithRetry(() => printful.get(`/v2/orders/${id}`))
-    const order = res.data?.result as ManualOrder | undefined
-    if (order?.costs) {
-      order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
-    }
-    return order ?? null
+    return extractManualOrder(res.data, `order lookup (${id})`, { allowMissing: true })
   } catch (error) {
     return handleOrderLookupError(error)
   }
@@ -291,11 +323,7 @@ export async function getManualStoreOrderByExternalId(externalId: string): Promi
   if (!externalId) return null
   try {
     const res = await requestWithRetry(() => printful.get(`/v2/orders/@${encodeURIComponent(externalId)}`))
-    const order = res.data?.result as ManualOrder | undefined
-    if (order?.costs) {
-      order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
-    }
-    return order ?? null
+    return extractManualOrder(res.data, `order lookup (external_id=${externalId})`, { allowMissing: true })
   } catch (error) {
     return handleOrderLookupError(error)
   }
@@ -304,11 +332,7 @@ export async function getManualStoreOrderByExternalId(externalId: string): Promi
 export async function confirmManualStoreOrder(orderId: number): Promise<ManualOrder | null> {
   try {
     const res = await requestWithRetry(() => printful.post(`/v2/orders/${orderId}/confirm`, {}))
-    const order = res.data?.result as ManualOrder | undefined
-    if (order?.costs) {
-      order.costs.calculation_status = normalizeCalculationStatus(order.costs.calculation_status)
-    }
-    return order ?? null
+    return extractManualOrder(res.data, `order confirmation (${orderId})`, { allowMissing: false })
   } catch (error) {
     const axiosError = error as AxiosError
     if (axiosError?.response?.status === 409) {
