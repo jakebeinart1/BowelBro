@@ -20,6 +20,51 @@ type StripeCheckoutSession = Stripe.Checkout.Session
 
 type PlacementGroup = ManualOrderPlacement
 
+const ALLOWED_PRINTFUL_PLACEMENTS = new Set(
+  [
+    'front',
+    'back',
+    'front_large',
+    'back_large',
+    'embroidery_chest_left',
+    'embroidery_chest_center',
+    'embroidery_sleeve_left_top',
+    'embroidery_sleeve_right_top',
+    'sleeve_left',
+    'sleeve_right',
+    'label_inside',
+    'label_outside',
+    'front_dtf',
+    'front_large_dtf',
+    'back_dtf',
+    'back_large_dtf',
+    'label_inside_dtf',
+    'short_sleeve_left_dtf',
+    'short_sleeve_right_dtf'
+  ] as const
+)
+
+function normalizePlacement(raw: unknown, variantPlacement: unknown): string {
+  const candidate = typeof raw === 'string' ? raw.trim().toLowerCase() : ''
+  const fallback = typeof variantPlacement === 'string' ? variantPlacement.trim().toLowerCase() : ''
+
+  if (candidate && ALLOWED_PRINTFUL_PLACEMENTS.has(candidate as any)) {
+    return candidate
+  }
+
+  if (fallback && ALLOWED_PRINTFUL_PLACEMENTS.has(fallback as any)) {
+    return fallback
+  }
+
+  if (candidate === 'default' || candidate === 'printfile' || candidate === 'mockup') {
+    if (fallback && ALLOWED_PRINTFUL_PLACEMENTS.has(fallback as any)) {
+      return fallback
+    }
+  }
+
+  return 'front'
+}
+
 function jsonField(value: Prisma.InputJsonValue | null): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
   return value === null ? Prisma.JsonNull : value
 }
@@ -161,7 +206,7 @@ export async function POST(req: NextRequest) {
             const fileUrl = file?.url ?? file?.preview_url ?? file?.thumbnail_url
             if (!fileUrl || typeof fileUrl !== 'string') continue
 
-            const placementKey = String(file?.placement ?? file?.type ?? variant.printfulPrintPlacement ?? 'front').toLowerCase() || 'front'
+            const placementKey = normalizePlacement(file?.placement ?? file?.type, variant.printfulPrintPlacement)
             const technique = typeof file?.technique === 'string' ? file.technique : variant.printfulPrintTechnique ?? 'dtg'
 
             const existing = placementGroups.get(placementKey)
@@ -186,8 +231,10 @@ export async function POST(req: NextRequest) {
               throw new Error(`Missing Printful print file for variant ${variant.id}`)
             }
 
-            placementGroups.set('front', {
-              placement: variant.printfulPrintPlacement ?? 'front',
+            const fallbackPlacement = normalizePlacement(null, variant.printfulPrintPlacement)
+
+            placementGroups.set(fallbackPlacement, {
+              placement: fallbackPlacement,
               technique: variant.printfulPrintTechnique ?? 'dtg',
               layers: [{ type: 'file', url: fallbackUrl }]
             })
