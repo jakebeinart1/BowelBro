@@ -249,6 +249,9 @@ export type ManualOrder = {
     name?: string
     quantity?: number
   }>
+  _links?: {
+    order_confirmation?: { href?: string }
+  }
 }
 
 function normalizeCalculationStatus(value: any): ManualOrderCosts['calculation_status'] {
@@ -329,9 +332,24 @@ export async function getManualStoreOrderByExternalId(externalId: string): Promi
   }
 }
 
-export async function confirmManualStoreOrder(orderId: number): Promise<ManualOrder | null> {
+function resolveConfirmationPath(orderId: number, order?: ManualOrder | null, fallback?: string | null): string {
+  const href = order?._links?.order_confirmation?.href ?? fallback ?? null
+  if (!href) return `/v2/orders/${orderId}/confirm`
+
   try {
-    const res = await requestWithRetry(() => printful.post(`/v2/orders/${orderId}/confirm`, {}))
+    const url = new URL(href)
+    return url.pathname + (url.search ?? '')
+  } catch {
+    if (href.startsWith('/')) return href
+    return `/v2/orders/${orderId}/confirm`
+  }
+}
+
+export async function confirmManualStoreOrder(orderId: number, order?: ManualOrder | null): Promise<ManualOrder | null> {
+  const path = resolveConfirmationPath(orderId, order)
+
+  try {
+    const res = await requestWithRetry(() => printful.post(path, {}))
     return extractManualOrder(res.data, `order confirmation (${orderId})`, { allowMissing: false })
   } catch (error) {
     const axiosError = error as AxiosError
@@ -406,6 +424,6 @@ export async function submitManualStoreOrder(
     throw new Error('Printful order retrieval failed during cost polling')
   }
 
-  const confirmed = await confirmManualStoreOrder(order.id)
+  const confirmed = await confirmManualStoreOrder(order.id, order)
   return confirmed ?? order
 }
