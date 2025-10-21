@@ -93,3 +93,18 @@ export async function getCartWithItems() {
     }
   })
 }
+
+export async function clearCurrentCart() {
+  const store = cookies()
+  const cartId = store.get(CART_COOKIE)?.value
+
+  if (cartId) {
+    await prisma.cart.delete({ where: { id: cartId } }).catch(async () => {
+      await prisma.cartItem.deleteMany({ where: { cartId } })
+    })
+  }
+
+  if (typeof (store as any).delete === 'function') {
+    ;(store as any).delete(CART_COOKIE)
+  }
+}

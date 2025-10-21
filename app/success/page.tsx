@@ -1,4 +1,8 @@
-export default function SuccessPage() {
+import { clearCurrentCart } from '@/lib/cart'
+
+export default async function SuccessPage() {
+  await clearCurrentCart().catch(() => {})
+
   return (
     <section className="mx-auto max-w-xl">
       <div className="card surface-elevated grid gap-4 text-center">
