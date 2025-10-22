@@ -215,9 +215,7 @@ export async function POST(req: NextRequest) {
               printfulId: printfulOrder.id ?? undefined,
               printfulResponse: jsonField(responseForStorage),
               printfulSyncedAt: now,
-              printfulError: null,
-              printfulCost: null,
-              donationAmount: null
+              printfulError: null
             }
           })
         } else {
@@ -243,9 +241,7 @@ export async function POST(req: NextRequest) {
                 printfulId: existing.id ?? undefined,
                 printfulResponse: jsonField(responseForStorage),
                 printfulSyncedAt: now,
-                printfulError: null,
-                printfulCost: null,
-                donationAmount: null
+                printfulError: null
               }
             })
 
@@ -263,9 +259,7 @@ export async function POST(req: NextRequest) {
             data: {
               printfulResponse: jsonField(responseForStorage),
               printfulError: errorMessage,
-              printfulSyncedAt: new Date(),
-              printfulCost: null,
-              donationAmount: null
+              printfulSyncedAt: new Date()
             }
           }).catch(() => {})
 
