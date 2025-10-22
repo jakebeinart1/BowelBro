@@ -4,11 +4,10 @@ import { AxiosError } from 'axios'
 import { Prisma, type OrderStatus } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import {
-  CreateManualOrderPayload,
-  ManualOrder,
-  ManualOrderPlacement,
-  submitManualStoreOrder,
-  getManualStoreOrderByExternalId
+  CreatePrintfulOrderPayload,
+  PrintfulOrder,
+  createPrintfulOrder,
+  getPrintfulOrderByExternalId
 } from '@/lib/printful'
 import { retry } from '@/lib/retry'
 
@@ -18,52 +17,6 @@ export const runtime = 'nodejs'
 
 type StripeCheckoutSession = Stripe.Checkout.Session
 
-type PlacementGroup = ManualOrderPlacement
-
-const ALLOWED_PRINTFUL_PLACEMENTS = new Set(
-  [
-    'front',
-    'back',
-    'front_large',
-    'back_large',
-    'embroidery_chest_left',
-    'embroidery_chest_center',
-    'embroidery_sleeve_left_top',
-    'embroidery_sleeve_right_top',
-    'sleeve_left',
-    'sleeve_right',
-    'label_inside',
-    'label_outside',
-    'front_dtf',
-    'front_large_dtf',
-    'back_dtf',
-    'back_large_dtf',
-    'label_inside_dtf',
-    'short_sleeve_left_dtf',
-    'short_sleeve_right_dtf'
-  ] as const
-)
-
-function normalizePlacement(raw: unknown, variantPlacement: unknown): string {
-  const candidate = typeof raw === 'string' ? raw.trim().toLowerCase() : ''
-  const fallback = typeof variantPlacement === 'string' ? variantPlacement.trim().toLowerCase() : ''
-
-  if (candidate && ALLOWED_PRINTFUL_PLACEMENTS.has(candidate as any)) {
-    return candidate
-  }
-
-  if (fallback && ALLOWED_PRINTFUL_PLACEMENTS.has(fallback as any)) {
-    return fallback
-  }
-
-  if (candidate === 'default' || candidate === 'printfile' || candidate === 'mockup') {
-    if (fallback && ALLOWED_PRINTFUL_PLACEMENTS.has(fallback as any)) {
-      return fallback
-    }
-  }
-
-  return 'front'
-}
 
 function jsonField(value: Prisma.InputJsonValue | null): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
   return value === null ? Prisma.JsonNull : value
@@ -113,23 +66,20 @@ export async function POST(req: NextRequest) {
       const cartId = (session.metadata?.cartId ?? '') as string
       const currency = (session.currency ?? 'usd').toLowerCase()
       const total = Number(session.amount_total ?? 0) / 100
+      const paymentIntentId =
+        typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : session.payment_intent?.id ?? null
 
       let shippingAddress = session.shipping_details?.address
       const name = session.customer_details?.name ?? undefined
       const email = session.customer_details?.email ?? undefined
       const phone = session.customer_details?.phone ?? undefined
 
-      if (!shippingAddress && session.payment_intent) {
+      if (!shippingAddress && paymentIntentId) {
         try {
-          const paymentIntentId =
-            typeof session.payment_intent === 'string'
-              ? session.payment_intent
-              : session.payment_intent.id
-
-          if (paymentIntentId) {
-            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
-            shippingAddress = paymentIntent.shipping?.address ?? undefined
-          }
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+          shippingAddress = paymentIntent.shipping?.address ?? undefined
         } catch (err) {
           console.error('Failed to retrieve payment intent for fallback shipping address', err)
         }
@@ -145,12 +95,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true })
       }
 
-    const cart = await retry(
-      () =>
-        prisma.cart.findUnique({
-          where: { id: cartId },
-          include: { items: { include: { variant: { include: { mockups: true } } } } }
-        }),
+      const cart = await retry(
+        () =>
+          prisma.cart.findUnique({
+            where: { id: cartId },
+            include: { items: { include: { variant: true } } }
+          }),
         3,
         400
       )
@@ -164,6 +114,7 @@ export async function POST(req: NextRequest) {
           status: 'PAID',
           total,
           currency,
+          stripeId: paymentIntentId ?? session.id,
           userId: null,
           shippingEmail: email,
           shippingPhone: phone,
@@ -185,85 +136,21 @@ export async function POST(req: NextRequest) {
       })
 
       try {
-        const items: CreateManualOrderPayload['items'] = cart.items.map((it) => {
+        const items: CreatePrintfulOrderPayload['items'] = cart.items.map((it) => {
           const variant = it.variant
-          const catalogVariantIdRaw = variant.printfulCatalogVariantId
-          const catalogVariantId =
-            typeof catalogVariantIdRaw === 'bigint'
-              ? Number(catalogVariantIdRaw)
-              : catalogVariantIdRaw != null
-                ? Number(catalogVariantIdRaw)
-                : null
+          const syncVariantId = Number(variant.printfulId)
 
-          if (!Number.isFinite(catalogVariantId) || !catalogVariantId || catalogVariantId <= 0) {
-            throw new Error(`Missing Printful catalog variant id for variant ${variant.id}; re-run sync to refresh catalog mappings.`)
-          }
-
-          const rawFiles = Array.isArray(variant.printfulPrintFiles) ? (variant.printfulPrintFiles as any[]) : []
-          const placementGroups = new Map<string, PlacementGroup>()
-
-          for (const file of rawFiles) {
-            const fileUrl = file?.url ?? file?.preview_url ?? file?.thumbnail_url
-            if (!fileUrl || typeof fileUrl !== 'string') continue
-
-            const placementKey = normalizePlacement(file?.placement ?? file?.type, variant.printfulPrintPlacement)
-            const technique = typeof file?.technique === 'string' ? file.technique : variant.printfulPrintTechnique ?? 'dtg'
-
-            const existing = placementGroups.get(placementKey)
-            if (existing) {
-              const existingUrls = new Set(existing.layers.map((layer) => layer.url))
-              if (!existingUrls.has(fileUrl)) {
-                existing.layers.push({ type: 'file', url: fileUrl })
-              }
-              continue
-            }
-
-            placementGroups.set(placementKey, {
-              placement: placementKey,
-              technique,
-              layers: [{ type: 'file', url: fileUrl }]
-            })
-          }
-
-          if (!placementGroups.size) {
-            const fallbackUrl = variant.printfulPrintFileUrl ?? variant.imageUrl ?? variant.mockups?.[0]?.url
-            if (!fallbackUrl) {
-              throw new Error(`Missing Printful print file for variant ${variant.id}`)
-            }
-
-            const fallbackPlacement = normalizePlacement(null, variant.printfulPrintPlacement)
-
-            placementGroups.set(fallbackPlacement, {
-              placement: fallbackPlacement,
-              technique: variant.printfulPrintTechnique ?? 'dtg',
-              layers: [{ type: 'file', url: fallbackUrl }]
-            })
-          }
-
-          const placements = Array.from(placementGroups.values())
-
-          const files = placements.flatMap((placement) =>
-            placement.layers.map((layer, index) => ({
-              type: index === 0 ? 'default' : 'additional',
-              placement: placement.placement,
-              url: layer.url
-            }))
-          )
-
-          if (!files.length) {
-            throw new Error(`Missing Printful print files for variant ${variant.id}`)
+          if (!Number.isFinite(syncVariantId) || syncVariantId <= 0) {
+            throw new Error(`Missing Printful sync variant id for variant ${variant.id}; re-run sync to refresh catalog mappings.`)
           }
 
           return {
-            source: 'catalog' as const,
-            catalog_variant_id: Math.trunc(catalogVariantId),
-            quantity: it.quantity,
-            placements,
-            files
+            sync_variant_id: syncVariantId,
+            quantity: it.quantity
           }
         })
 
-        const manualPayload: CreateManualOrderPayload = {
+        const payload: CreatePrintfulOrderPayload = {
           external_id: order.id,
           recipient: {
             name,
@@ -277,10 +164,10 @@ export async function POST(req: NextRequest) {
             zip: shippingAddress.postal_code!
           },
           items,
-          shipping: 'STANDARD'
+          confirm: false
         }
 
-        const payloadForStorage = JSON.parse(JSON.stringify(manualPayload)) as Prisma.InputJsonValue
+        const payloadForStorage = JSON.parse(JSON.stringify(payload)) as Prisma.InputJsonValue
 
         await prisma.order.update({
           where: { id: order.id },
@@ -290,7 +177,7 @@ export async function POST(req: NextRequest) {
           }
         })
 
-        const printfulOrder = await submitManualStoreOrder(manualPayload)
+        const printfulOrder = await createPrintfulOrder(payload)
 
         if (printfulOrder) {
           const responseForStorage = JSON.parse(JSON.stringify(printfulOrder)) as Prisma.InputJsonValue
@@ -303,7 +190,9 @@ export async function POST(req: NextRequest) {
               printfulId: printfulOrder.id ?? undefined,
               printfulResponse: jsonField(responseForStorage),
               printfulSyncedAt: now,
-              printfulError: null
+              printfulError: null,
+              printfulCost: null,
+              donationAmount: null
             }
           })
         } else {
@@ -312,11 +201,11 @@ export async function POST(req: NextRequest) {
           })
         }
       } catch (error) {
-        const axiosError = error as AxiosError<{ result?: ManualOrder | null }>
+        const axiosError = error as AxiosError<{ result?: PrintfulOrder | null }>
         let handled = false
 
         if (axiosError?.response?.status === 409 || axiosError?.response?.status === 400) {
-          const existing = await getManualStoreOrderByExternalId(order.id).catch(() => null)
+          const existing = await getPrintfulOrderByExternalId(order.id).catch(() => null)
 
           if (existing) {
             const responseForStorage = JSON.parse(JSON.stringify(existing)) as Prisma.InputJsonValue
@@ -329,7 +218,9 @@ export async function POST(req: NextRequest) {
                 printfulId: existing.id ?? undefined,
                 printfulResponse: jsonField(responseForStorage),
                 printfulSyncedAt: now,
-                printfulError: null
+                printfulError: null,
+                printfulCost: null,
+                donationAmount: null
               }
             })
 
@@ -347,11 +238,13 @@ export async function POST(req: NextRequest) {
             data: {
               printfulResponse: jsonField(responseForStorage),
               printfulError: errorMessage,
-              printfulSyncedAt: new Date()
+              printfulSyncedAt: new Date(),
+              printfulCost: null,
+              donationAmount: null
             }
           }).catch(() => {})
 
-          console.error('Printful manual order submission failed:', responseData ?? error)
+          console.error('Printful order creation failed:', responseData ?? error)
           throw error
         }
       }
