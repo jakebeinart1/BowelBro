@@ -178,9 +178,16 @@ const ordersRaw = await prisma.order.findMany({
 })
 
 const orders: SerializableOrder[] = ordersRaw.map((order) => ({
-  ...order,
+  id: order.id,
+  stripeId: order.stripeId,
+  printfulId: order.printfulId,
+  createdAt: order.createdAt,
+  total: Number(toNumber(order.total)),
+  currency: order.currency,
   printfulCost: null,
-  donationAmount: null
+  donationAmount: null,
+  status: order.status,
+  printfulResponse: order.printfulResponse
 }))
 
   const rows: string[] = []
