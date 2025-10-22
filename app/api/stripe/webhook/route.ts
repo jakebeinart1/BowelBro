@@ -63,13 +63,6 @@ export async function POST(req: NextRequest) {
     try {
       const session = event.data.object as StripeCheckoutSession
 
-      const cartId = (session.metadata?.cartId ?? '') as string
-      if (!cartId) {
-        console.warn('Stripe session missing cartId metadata; skipping fulfillment', {
-          stripeId: stripeIdentifier
-        })
-        return NextResponse.json({ received: true })
-      }
       const currency = (session.currency ?? 'usd').toLowerCase()
       const total = Number(session.amount_total ?? 0) / 100
       const paymentIntentId =
@@ -77,6 +70,14 @@ export async function POST(req: NextRequest) {
           ? session.payment_intent
           : session.payment_intent?.id ?? null
       const stripeIdentifier = paymentIntentId ?? session.id
+
+      const cartId = (session.metadata?.cartId ?? '') as string
+      if (!cartId) {
+        console.warn('Stripe session missing cartId metadata; skipping fulfillment', {
+          stripeId: stripeIdentifier
+        })
+        return NextResponse.json({ received: true })
+      }
 
       if (session.payment_status && session.payment_status !== 'paid') {
         console.info('Skipping non-paid checkout.session.completed event', {
