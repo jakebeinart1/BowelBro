@@ -162,22 +162,26 @@ async function main() {
       }
     : undefined
 
-  const orders = (await prisma.order.findMany({
-    where: dateFilter ? { createdAt: dateFilter } : undefined,
-    orderBy: { createdAt: 'asc' },
-    select: {
-      id: true,
-      createdAt: true,
-      stripeId: true,
-      total: true,
-      currency: true,
-      printfulCost: true,
-      donationAmount: true,
-      printfulId: true,
-      status: true,
-      printfulResponse: true
-    }
-  })) as SerializableOrder[]
+const ordersRaw = await prisma.order.findMany({
+  where: dateFilter ? { createdAt: dateFilter } : undefined,
+  orderBy: { createdAt: 'asc' },
+  select: {
+    id: true,
+    createdAt: true,
+    stripeId: true,
+    total: true,
+    currency: true,
+    printfulId: true,
+    status: true,
+    printfulResponse: true
+  }
+})
+
+const orders: SerializableOrder[] = ordersRaw.map((order) => ({
+  ...order,
+  printfulCost: null,
+  donationAmount: null
+}))
 
   const rows: string[] = []
   rows.push(
