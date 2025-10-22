@@ -64,12 +64,36 @@ export async function POST(req: NextRequest) {
       const session = event.data.object as StripeCheckoutSession
 
       const cartId = (session.metadata?.cartId ?? '') as string
+      if (!cartId) {
+        console.warn('Stripe session missing cartId metadata; skipping fulfillment', {
+          stripeId: stripeIdentifier
+        })
+        return NextResponse.json({ received: true })
+      }
       const currency = (session.currency ?? 'usd').toLowerCase()
       const total = Number(session.amount_total ?? 0) / 100
       const paymentIntentId =
         typeof session.payment_intent === 'string'
           ? session.payment_intent
           : session.payment_intent?.id ?? null
+      const stripeIdentifier = paymentIntentId ?? session.id
+
+      if (session.payment_status && session.payment_status !== 'paid') {
+        console.info('Skipping non-paid checkout.session.completed event', {
+          stripeId: stripeIdentifier,
+          paymentStatus: session.payment_status
+        })
+        return NextResponse.json({ received: true })
+      }
+
+      const existingOrder = await prisma.order.findUnique({ where: { stripeId: stripeIdentifier } })
+      if (existingOrder) {
+        console.info('Order already processed for Stripe identifier, skipping duplicate fulfillment', {
+          stripeId: stripeIdentifier,
+          orderId: existingOrder.id
+        })
+        return NextResponse.json({ received: true })
+      }
 
       let shippingAddress = session.shipping_details?.address
       const name = session.customer_details?.name ?? undefined
@@ -114,7 +138,7 @@ export async function POST(req: NextRequest) {
           status: 'PAID',
           total,
           currency,
-          stripeId: paymentIntentId ?? session.id,
+          stripeId: stripeIdentifier,
           userId: null,
           shippingEmail: email,
           shippingPhone: phone,
