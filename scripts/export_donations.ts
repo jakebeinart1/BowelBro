@@ -133,7 +133,8 @@ async function fetchStripeInfo(stripeId: string | null): Promise<StripeInfo> {
     const intent = await stripeClient.paymentIntents.retrieve(stripeId, { expand: ['charges.data'] })
     const amountReceived = intent.amount_received ?? intent.amount ?? 0
     const amountRefundedFromIntent = (intent as Stripe.PaymentIntent & { amount_refunded?: number }).amount_refunded ?? 0
-    const chargeRefunds = intent.charges?.data?.reduce((sum, charge) => sum + (charge.amount_refunded ?? 0), 0) ?? 0
+    const charges = (intent as Stripe.PaymentIntent & { charges?: Stripe.ApiList<Stripe.Charge> }).charges
+    const chargeRefunds = charges?.data?.reduce((sum, charge) => sum + (charge.amount_refunded ?? 0), 0) ?? 0
     const refundTotal = Math.max(amountRefundedFromIntent, chargeRefunds)
     const info: StripeInfo = {
       amountPaid: Number((amountReceived / 100).toFixed(2)),
