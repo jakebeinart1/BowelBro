@@ -34,7 +34,7 @@ export default function HomePage() {
       </div>
 
       <div className="relative hidden lg:block">
-        <div className="flex h-full min-h-[420px] flex-col justify-between gap-8 rounded-3xl border border-[var(--bg-highlight)] bg-[var(--bg-soft)] p-6 shadow-[var(--shadow-sm)]">
+        <div className="flex h-full min-h-[420px] flex-col justify-between gap-8 rounded-3xl border border-[#e8d5c8] bg-[var(--peach)] p-6 shadow-[var(--shadow-sm)]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--green-sage)]">IBD Awareness</p>
             <p className="mt-3 text-xl font-semibold leading-snug text-[var(--green-dark)]">
