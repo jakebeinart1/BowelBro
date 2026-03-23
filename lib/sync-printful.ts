@@ -29,20 +29,28 @@ export async function syncPrintfulProducts(limit = 100) {
         const prod = detail?.sync_product
         const variants = detail?.sync_variants ?? []
 
+        const catalogProductIdRaw = (detail?.sync_variants?.[0] as any)?.product?.product_id ?? null
+        const catalogProductId =
+          catalogProductIdRaw != null && Number.isFinite(Number(catalogProductIdRaw)) && Number(catalogProductIdRaw) > 0
+            ? BigInt(Math.trunc(Number(catalogProductIdRaw)))
+            : null
+
         const product = await prisma.product.upsert({
           where: { printfulId: productIdBI },
           update: {
             name: prod?.name ?? item.name ?? 'Unnamed',
             thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined,
             description: prod?.description ?? undefined,
-            isActive: true
+            isActive: true,
+            printfulCatalogProductId: catalogProductId ?? undefined
           },
           create: {
             printfulId: productIdBI,
             name: prod?.name ?? item.name ?? 'Unnamed',
             thumbnailUrl: prod?.thumbnail_url ?? item.thumbnail_url ?? undefined,
             description: prod?.description ?? undefined,
-            isActive: true
+            isActive: true,
+            printfulCatalogProductId: catalogProductId ?? undefined
           }
         })
 

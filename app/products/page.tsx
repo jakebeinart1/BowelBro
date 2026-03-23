@@ -46,9 +46,6 @@ export default async function ProductsPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <a className="btn-secondary" href="/">
-              Back to home
-            </a>
             <a className="btn" href="/cart">
               View cart
             </a>
@@ -57,7 +54,7 @@ export default async function ProductsPage() {
       </header>
 
       {products.length === 0 ? (
-        <div className="card text-center text-sm text-[var(--text)]/75">
+        <div className="card text-center text-sm text-[var(--text-secondary)]">
           <p>No products yet—run the admin sync to pull in your Printful catalog.</p>
         </div>
       ) : (
@@ -98,19 +95,9 @@ export default async function ProductsPage() {
                       <p className="mt-1 text-sm text-[var(--text-secondary)]">Starting at ${samplePrice}</p>
                     ) : null}
                   </div>
-                  <div className="grid gap-2 text-sm text-[var(--text-secondary)]">
-                    {product.variants.slice(0, 3).map((variant) => (
-                      <div key={variant.id} className="flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-accent)]" />
-                        <span>{variant.name}</span>
-                      </div>
-                    ))}
-                    {product.variants.length > 3 ? (
-                      <span className="text-xs uppercase tracking-[0.2rem] text-[var(--green-sage)]">
-                        +{product.variants.length - 3} more variants
-                      </span>
-                    ) : null}
-                  </div>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {product.variants.length} size{product.variants.length !== 1 ? 's' : ''} available
+                  </p>
                   <a className="btn self-start" href={`/products/${product.id}`}>
                     View details
                   </a>

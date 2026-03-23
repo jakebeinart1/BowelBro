@@ -25,16 +25,17 @@ enum Role {
 }
 
 model Product {
-  id           String    @id @default(cuid())
-  printfulId   BigInt    @unique // <-- BigInt
-  name         String
-  description  String?
-  thumbnailUrl String?
-  isActive     Boolean   @default(true)
-  currency     String    @default("usd")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  variants     Variant[]
+  id                      String    @id @default(cuid())
+  printfulId              BigInt    @unique // <-- BigInt
+  printfulCatalogProductId BigInt?
+  name                    String
+  description             String?
+  thumbnailUrl            String?
+  isActive                Boolean   @default(true)
+  currency                String    @default("usd")
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  variants                Variant[]
 }
 
 model Variant {

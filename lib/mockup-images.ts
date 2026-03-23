@@ -123,7 +123,7 @@ function listMockupFiles(productName: string, explicitSlug?: string | null) {
       .readdirSync(path.join(base, dir), { withFileTypes: true })
       .filter((entry) => entry.isFile())
       .map((entry) => entry.name)
-      .filter((name) => /\.jpe?g$/i.test(name))
+      .filter((name) => /\.(jpe?g|png)$/i.test(name))
       .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
 
     entries = files.map((fileName) => ({
@@ -291,4 +291,9 @@ export function buildMockupGallery(
 
 export function getMockupPlaceholder() {
   return FALLBACK_PLACEHOLDER
+}
+
+export function clearMockupCaches() {
+  directoryCache.clear()
+  fileCache.clear()
 }

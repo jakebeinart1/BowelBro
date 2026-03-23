@@ -22,7 +22,8 @@ export async function GET(
     const buffer = new Uint8Array(data)
 
     const headers = new Headers()
-    headers.set('Content-Type', 'image/jpeg')
+    const ext = path.extname(filePath).toLowerCase()
+    headers.set('Content-Type', ext === '.png' ? 'image/png' : 'image/jpeg')
     headers.set('Cache-Control', 'public, max-age=31536000, immutable')
     headers.set('Content-Length', String(buffer.byteLength))
     headers.set('Content-Disposition', `inline; filename="${path.basename(filePath)}"`)

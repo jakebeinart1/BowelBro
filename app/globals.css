@@ -160,7 +160,8 @@ a:hover { color: var(--green-accent); }
   height: 88px;
   border-radius: 12px;
   border: 1px solid var(--border-light);
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--bg-soft);
 }
 
 .product-detail-image-frame,

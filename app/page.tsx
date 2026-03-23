@@ -4,9 +4,9 @@ export default function HomePage() {
       <div className="card">
         <span className="badge-premium text-[#0b2a1b]">Bowel Bros Forever</span>
         <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--green-dark)] sm:text-5xl">
-          Everyone is a <span className="text-[var(--accent-green)]">BOWEL BRO.</span>
+          Everyone is a <span className="text-[var(--green-accent)]">BOWEL BRO.</span>
         </h1>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--body-text-muted)]">
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--text-secondary)]">
           Every single dollar of profit goes straight to IBD research and patient support—this shop exists to raise awareness, not income. Help save a fellow bowel, bro.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
@@ -38,13 +38,13 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(39,174,96,0.22),transparent_65%)]" />
           <div className="relative flex h-full flex-col justify-between gap-8 p-8">
             <div className="space-y-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.35rem] text-[var(--sage)]">IBD Awareness</p>
-          <p className="max-w-xs text-base text-[var(--text-primary)]">
-            From playful slogans to bold statements, every design reminds the world to listen to our guts and care for our insides.
-          </p>
+              <p className="text-sm font-semibold uppercase tracking-[0.35rem] text-white/60">IBD Awareness</p>
+              <p className="max-w-xs text-base text-white/80">
+                From playful slogans to bold statements, every design reminds the world to listen to our guts and care for our insides.
+              </p>
               <div className="divider-soft" />
             </div>
-            <div className="grid gap-4 text-sm text-[var(--text-secondary)]">
+            <div className="grid gap-4 text-sm text-white/60">
               <div className="flex items-center gap-3">
                 <span className="h-2 w-2 rounded-full bg-[var(--green-accent)]" />
                 Sustainably printed on demand by Printful.
@@ -73,7 +73,7 @@ export default function HomePage() {
               </p>
             </article>
             <article className="rounded-2xl border border-[var(--border-light)] bg-white p-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[#2f3f8f]">Community</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.25rem] text-[var(--green-sage)]">Community</h3>
               <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
                 We’re building a loud, proud crew who celebrate gutsy stories and normalise digestive health conversations.
               </p>
