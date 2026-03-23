@@ -34,28 +34,52 @@ export default function HomePage() {
       </div>
 
       <div className="relative hidden lg:block">
-        <div className="card h-full min-h-[420px] overflow-hidden border-[rgba(82,121,111,0.4)] bg-[linear-gradient(165deg,rgba(26,77,46,0.92),rgba(10,47,31,0.85))]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(39,174,96,0.22),transparent_65%)]" />
+        <div
+          className="relative h-full min-h-[420px] overflow-hidden rounded-3xl"
+          style={{ background: 'linear-gradient(165deg, #1a4d2e 0%, #0a2f1f 100%)', border: '1px solid rgba(82,121,111,0.4)' }}
+        >
+          {/* radial glow top */}
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 70% 10%, rgba(39,174,96,0.28) 0%, transparent 60%)' }} />
+          {/* decorative arc */}
+          <div
+            className="absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-10"
+            style={{ background: 'conic-gradient(from 0deg, #27ae60, #d4af37, #27ae60)' }}
+          />
+
           <div className="relative flex h-full flex-col justify-between gap-8 p-8">
+            {/* header */}
             <div className="space-y-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.35rem] text-white/60">IBD Awareness</p>
-              <p className="max-w-xs text-base text-white/80">
-                From playful slogans to bold statements, every design reminds the world to listen to our guts and care for our insides.
+              <span className="inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.3rem]" style={{ background: 'rgba(39,174,96,0.18)', color: '#6ee79e', border: '1px solid rgba(39,174,96,0.3)' }}>
+                IBD Awareness
+              </span>
+              <p className="max-w-[220px] text-lg font-semibold leading-snug text-white">
+                Wear it loud. Every stitch funds the fight.
               </p>
-              <div className="divider-soft" />
+              <div style={{ height: 1, background: 'linear-gradient(90deg, rgba(255,255,255,0.12), transparent)' }} />
             </div>
-            <div className="grid gap-4 text-sm text-white/60">
-              <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--green-accent)]" />
-                Sustainably printed on demand by Printful.
+
+            {/* stats */}
+            <div className="grid gap-3">
+              <div className="flex items-center gap-4 rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style={{ background: 'rgba(39,174,96,0.2)' }}>🌿</span>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#6ee79e' }}>Printed on demand</p>
+                  <p className="text-sm text-white/70">Zero waste, sustainably made</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--green-sage)]" />
-                Packed and shipped within 3-5 days worldwide.
+              <div className="flex items-center gap-4 rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style={{ background: 'rgba(82,121,111,0.3)' }}>📦</span>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#a8c5bb' }}>Ships worldwide</p>
+                  <p className="text-sm text-white/70">Ready in 3–5 business days</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--gold)]" />
-                Proceeds fuel IBD research and patient support.
+              <div className="flex items-center gap-4 rounded-2xl p-4" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style={{ background: 'rgba(212,175,55,0.18)' }}>💛</span>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#d4af37' }}>100% donated</p>
+                  <p className="text-sm text-white/70">Every cent to IBD research</p>
+                </div>
               </div>
             </div>
           </div>
