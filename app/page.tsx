@@ -34,34 +34,30 @@ export default function HomePage() {
       </div>
 
       <div className="relative hidden lg:block">
-        <div className="card flex h-full min-h-[420px] flex-col justify-between gap-8">
-          <div className="space-y-4">
-            <span className="badge-premium">IBD Awareness</span>
-            <p className="max-w-[220px] text-lg font-semibold leading-snug text-[var(--green-dark)]">
-              Wear it loud. Every stitch funds the fight.
+        <div className="flex h-full min-h-[420px] flex-col justify-between gap-8 rounded-3xl border border-[var(--bg-highlight)] bg-[var(--bg-soft)] p-6 shadow-[var(--shadow-sm)]">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--green-sage)]">IBD Awareness</p>
+            <p className="mt-3 text-xl font-semibold leading-snug text-[var(--green-dark)]">
+              Wear it loud.<br />Every stitch funds the fight.
             </p>
-            <div className="divider-soft" />
           </div>
 
-          <div className="grid gap-3">
-            <div className="flex items-center gap-4 rounded-2xl border border-[var(--border-light)] bg-[#e1f2e7] p-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-lg shadow-[var(--shadow-sm)]">🌿</span>
+          <div className="grid gap-2">
+            <div className="flex items-center gap-3 border-l-2 border-[var(--green-accent)] bg-white/60 px-4 py-3 rounded-r-xl">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--green-dark)]">Printed on demand</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--green-dark)]">Printed on demand</p>
                 <p className="text-sm text-[var(--text-secondary)]">Zero waste, sustainably made</p>
               </div>
             </div>
-            <div className="flex items-center gap-4 rounded-2xl border border-[var(--border-light)] bg-[#fff4d4] p-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-lg shadow-[var(--shadow-sm)]">📦</span>
+            <div className="flex items-center gap-3 border-l-2 border-[var(--green-sage)] bg-white/60 px-4 py-3 rounded-r-xl">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--green-dark)]">Ships worldwide</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--green-dark)]">Ships worldwide</p>
                 <p className="text-sm text-[var(--text-secondary)]">Ready in 3–5 business days</p>
               </div>
             </div>
-            <div className="flex items-center gap-4 rounded-2xl border border-[var(--border-light)] bg-[#f3e6d8] p-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-lg shadow-[var(--shadow-sm)]">💛</span>
+            <div className="flex items-center gap-3 border-l-2 border-[var(--gold)] bg-white/60 px-4 py-3 rounded-r-xl">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--green-dark)]">100% donated</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--green-dark)]">100% donated</p>
                 <p className="text-sm text-[var(--text-secondary)]">Every cent to IBD research</p>
               </div>
             </div>
