@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import { listSyncProducts, getSyncProduct } from '@/lib/printful'
+import { normalizedShirtPrice } from '@/lib/pricing'
 
 const toBigInt = (value: unknown) => BigInt(String(value ?? '0'))
 
@@ -57,7 +58,9 @@ export async function syncPrintfulProducts(limit = 100) {
         for (const variant of variants) {
           const variantIdBI = toBigInt(variant.id)
           seenVariantPrintfulIds.add(variantIdBI)
-          const unitPrice = parseFloat(String(variant.retail_price ?? '0'))
+          // Normalize pricing so every shirt uses the same size-based ladder,
+          // rather than whatever per-product price was set on Printful.
+          const unitPrice = normalizedShirtPrice(variant.name ?? '')
           const files: any[] = Array.isArray((variant as any)?.files) ? ((variant as any)?.files ?? []) : []
           const preview = files?.[0]?.preview_url
           const mockupFiles = files.flatMap((file: any) => [file?.preview_url, file?.url, file?.thumbnail_url])

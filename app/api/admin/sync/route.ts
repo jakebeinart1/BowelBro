@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { listSyncProducts, getSyncProduct } from '@/lib/printful'
 import { prisma } from '@/lib/db'
+import { normalizedShirtPrice } from '@/lib/pricing'
 
 export const runtime = 'nodejs'
 
@@ -45,14 +46,14 @@ export async function POST(req: NextRequest) {
           where: { printfulId: BigInt(String(v.id)) },
           update: {
             name: v.name ?? `Variant ${v.id}`,
-            retailPrice: v.retail_price ? Number(v.retail_price) : 0,
+            retailPrice: normalizedShirtPrice(v.name ?? ''),
             imageUrl: v.files?.[0]?.preview_url ?? undefined,
             productId: product.id
           },
           create: {
             printfulId: BigInt(String(v.id)),
             name: v.name ?? `Variant ${v.id}`,
-            retailPrice: v.retail_price ? Number(v.retail_price) : 0,
+            retailPrice: normalizedShirtPrice(v.name ?? ''),
             imageUrl: v.files?.[0]?.preview_url ?? undefined,
             productId: product.id
           }
