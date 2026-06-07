@@ -3,8 +3,21 @@
 import 'dotenv/config'
 import { prisma } from '../lib/db'
 import axios, { AxiosError } from 'axios'
+import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
+
+// Returns true if `filePath` is byte-identical to any other image already in `dir`.
+function isDuplicateFile(filePath: string, dir: string): boolean {
+  const target = crypto.createHash('md5').update(fs.readFileSync(filePath)).digest('hex')
+  const base = path.basename(filePath)
+  for (const other of fs.readdirSync(dir)) {
+    if (other === base || !/\.(jpe?g|png)$/i.test(other)) continue
+    const hash = crypto.createHash('md5').update(fs.readFileSync(path.join(dir, other))).digest('hex')
+    if (hash === target) return true
+  }
+  return false
+}
 
 const MOCKUPS_DIR = path.join(process.cwd(), 'mockups')
 
@@ -114,18 +127,9 @@ async function main() {
         }
       }
 
-      // Get the variant product catalog image (blank garment photo)
-      if (sv.product?.image && !seenHashes.has('product-image')) {
-        seenHashes.add('product-image')
-        const ext = sv.product.image.includes('.png') ? '.png' : '.jpg'
-        const fileName = `catalog-product-image${ext}`
-        const filePath = path.join(productDir, fileName)
-        const ok = await downloadFile(sv.product.image, filePath)
-        if (ok) {
-          downloaded++
-          console.log(`  Downloaded: ${fileName} (catalog image)`)
-        }
-      }
+      // Note: we intentionally skip the variant catalog image (sv.product.image)
+      // because it is a stock photo of a BLANK garment with no design printed on
+      // it, which is confusing in the product gallery.
     }
 
     // Also download product thumbnail if available
@@ -136,8 +140,14 @@ async function main() {
       const filePath = path.join(productDir, fileName)
       const ok = await downloadFile(product.thumbnailUrl, filePath)
       if (ok) {
-        downloaded++
-        console.log(`  Downloaded: ${fileName} (product thumbnail)`)
+        // The thumbnail is often byte-identical to a mockup we already saved,
+        // which would show the same image twice in the gallery. Drop it if so.
+        if (isDuplicateFile(filePath, productDir)) {
+          fs.unlinkSync(filePath)
+        } else {
+          downloaded++
+          console.log(`  Downloaded: ${fileName} (product thumbnail)`)
+        }
       }
     }
 
